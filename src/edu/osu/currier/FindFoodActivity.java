@@ -1,5 +1,12 @@
 package edu.osu.currier;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.parse.Parse;
 import com.parse.ParseUser;
 
@@ -7,9 +14,11 @@ import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.os.Bundle;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Build;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -19,11 +28,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.app.FragmentTransaction;
+import android.app.FragmentManager;
+import android.app.ListFragment;
+import android.location.Geocoder;
+import android.location.GpsStatus;
+import android.location.Location;
+import android.location.Address;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+
 
 public class FindFoodActivity extends FragmentActivity implements
-		ActionBar.OnNavigationListener {
+		ActionBar.OnNavigationListener, OnMapClickListener, LocationListener {
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -31,6 +58,20 @@ public class FindFoodActivity extends FragmentActivity implements
 	 */
 	private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 	private static final String ACT = "FindFoodActivity";
+	
+	final int RQS_GooglePlayServices = 1;
+	LocationManager locationManager;
+	double latitude;
+	double longitude;
+	
+	private FragmentManager fragmentManager = getFragmentManager();
+    private FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    
+    //A sample list of addresses for a ListFragment
+    static String[] addresses = new String[] {
+    	"252 East Maynard Avenue Columbus Ohio 43202",
+    	"30 East Lane Avenue Columbus Ohio 43210"
+    };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -116,13 +157,52 @@ public class FindFoodActivity extends FragmentActivity implements
 	public boolean onNavigationItemSelected(int position, long id) {
 		// When the given dropdown item is selected, show its contents in the
 		// container view.
-		Fragment fragment = new DummySectionFragment();
-		Bundle args = new Bundle();
-		args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
-		fragment.setArguments(args);
-		getSupportFragmentManager().beginTransaction()
-				.replace(R.id.container, fragment).commit();
-		return true;
+		FragmentManager fragmentManager = getFragmentManager();
+	    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+	    
+		switch(position){
+		//Dummy scenario
+		case 0:		
+			fragmentManager.popBackStack();
+			Fragment fragment = new DummySectionFragment();
+			Bundle args = new Bundle();
+			args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
+			fragment.setArguments(args);
+			fragmentTransaction.add(R.id.container, fragment);
+		    fragmentTransaction.addToBackStack(null);
+		    fragmentTransaction.commit();
+			return true;
+		//Display the neighborhood map
+		case 1:
+			fragmentManager.popBackStack();
+			final MapFragment fullMapFragment = new MapFragment();
+		    fragmentTransaction.add(R.id.fullMapView, fullMapFragment);
+		    fragmentTransaction.addToBackStack(null);
+		    fragmentTransaction.commit();
+		    
+		    moveMap(fullMapFragment);
+			return true;
+		//Display the neighborhood map on top of screen, list of addresses on bottom half of screen
+		case 2:
+			fragmentManager.popBackStack();
+			
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,addresses);
+			ListFragment listFragment = new ListFragment();
+			listFragment.setListAdapter(adapter);
+
+			final MapFragment partialMapFragment = new MapFragment();
+			
+			fragmentTransaction.add(R.id.mapComponent, partialMapFragment);
+			fragmentTransaction.addToBackStack(null);
+			fragmentTransaction.add(R.id.list, listFragment);
+		    fragmentTransaction.addToBackStack(null);
+		    fragmentTransaction.commit();
+		    
+		    moveMap(partialMapFragment);	    
+			return true;
+		default:
+			return true;
+		}
 	}
 	
 	@Override
@@ -174,6 +254,123 @@ public class FindFoodActivity extends FragmentActivity implements
 					ARG_SECTION_NUMBER)));
 			return textView;
 		}
+	}
+	
+	//Moves the provided MapFragment to the user's current location, placing a marker at the user's location
+	public void moveMap(final MapFragment mapFragment){
+		//Start the location manager and get the user's most current (lat, long)
+		locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 500.0f, this);
+	    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	    if(location!=null){
+	    	latitude = location.getLatitude();
+	    	longitude = location.getLongitude();
+	    }
+	    //Ensure the MapFragment has initialized via Timer, move the map to the (lat, long) from LocationManager
+	    final Timer timer = new Timer();
+	    timer.schedule(new TimerTask() {
+	    	@Override
+	    	public void run() {
+	    		if(mapFragment != null && mapFragment.isVisible()) {
+	    			timer.cancel();
+	    			runOnUiThread(new Runnable() {
+	    				@Override
+	    				public void run() {
+	    					GoogleMap map = mapFragment.getMap();
+	    					if(map!=null) {
+	    						//map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
+	    						map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
+	    						map.addMarker(new MarkerOptions()
+	    						.position(new LatLng(latitude,longitude))
+	    						.title("User's Location"));
+	    						
+	    						//Adds markers for all the possible houses to order from
+	    						//Grabs the (lat, lon) from the String "location"
+	    						for(String location : addresses){
+	    							List<Address> address = null;
+	    							try {
+										address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(location, 1);
+										double lat = address.get(0).getLatitude();
+										double lon = address.get(0).getLongitude();
+										map.addMarker(new MarkerOptions()
+										.position(new LatLng(lat, lon))
+										.title(location));
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+	    						}
+	    					}
+	    					
+	    				}
+	    			});
+	    		}
+	    	}
+	    }, 0, 200);	    
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private LocationListener locationListener = new LocationListener(){
+		@Override
+		public void onLocationChanged(Location arg0){
+		}
+
+		@Override
+		public void onProviderDisabled(String provider) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onProviderEnabled(String provider) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
+	
+	private GpsStatus.Listener gpsListener = new GpsStatus.Listener() {
+		
+		@Override
+		public void onGpsStatusChanged(int event) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
+
+	@Override
+	public void onMapClick(LatLng arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
