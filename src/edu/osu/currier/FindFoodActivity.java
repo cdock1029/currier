@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.app.FragmentTransaction;
 import android.app.FragmentManager;
@@ -63,6 +64,7 @@ public class FindFoodActivity extends FragmentActivity implements
 	LocationManager locationManager;
 	double latitude;
 	double longitude;
+	GoogleMap map;
 	
 	private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -186,10 +188,32 @@ public class FindFoodActivity extends FragmentActivity implements
 		case 2:
 			fragmentManager.popBackStack();
 			
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,addresses);
-			ListFragment listFragment = new ListFragment();
-			listFragment.setListAdapter(adapter);
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,addresses) {
+				//Sets the text color of the ListFragment to BLACK
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent) {
+					TextView textView = (TextView) super.getView(position, convertView, parent);
+					textView.setTextColor(android.graphics.Color.BLACK);
+					return textView;
+				}
+			};
+			ListFragment listFragment = new ListFragment() {
+				@Override
+				public void onListItemClick(ListView l, View v, int position, long id) {
+					List<Address> address = null;
+					try {
+						address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(addresses[position], 1);
+						double lat = address.get(0).getLatitude();
+						double lon = address.get(0).getLongitude();
+						map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15));
 
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			};
+			listFragment.setListAdapter(adapter);
 			final MapFragment partialMapFragment = new MapFragment();
 			
 			fragmentTransaction.add(R.id.mapComponent, partialMapFragment);
@@ -276,7 +300,7 @@ public class FindFoodActivity extends FragmentActivity implements
 	    			runOnUiThread(new Runnable() {
 	    				@Override
 	    				public void run() {
-	    					GoogleMap map = mapFragment.getMap();
+	    					map = mapFragment.getMap();
 	    					if(map!=null) {
 	    						//map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
 	    						map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
