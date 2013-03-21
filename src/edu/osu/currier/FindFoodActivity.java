@@ -198,6 +198,7 @@ public class FindFoodActivity extends FragmentActivity implements
 				}
 			};
 			ListFragment listFragment = new ListFragment() {
+				//Moves to the address listed in the ListFragment
 				@Override
 				public void onListItemClick(ListView l, View v, int position, long id) {
 					List<Address> address = null;
@@ -208,7 +209,6 @@ public class FindFoodActivity extends FragmentActivity implements
 						map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15));
 
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -320,7 +320,6 @@ public class FindFoodActivity extends FragmentActivity implements
 										.position(new LatLng(lat, lon))
 										.title(location));
 									} catch (IOException e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 									
