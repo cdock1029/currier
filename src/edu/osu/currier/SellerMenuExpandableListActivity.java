@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.money.Money;
+
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -60,7 +62,10 @@ public class SellerMenuExpandableListActivity extends ExpandableListActivity {
 				Map<String, String> curChildMap = new HashMap<String, String>();
 				children.add(curChildMap);
 				// curChildMap.put(NAME, "Child " + j);
+				Money money = Money.parse("USD " + j + ".00");
+				MenuItem item = new MenuItem("item", "this is an item", money);
 				curChildMap.put(IS_EVEN, (j % 2 == 0) ? "Hello " + j: "Good Morning "+ j);
+				//curChildMap.put("some string", item.getDescription());
 			}
 			childData.add(children);
 		}
@@ -78,21 +83,6 @@ public class SellerMenuExpandableListActivity extends ExpandableListActivity {
 				new int[] { android.R.id.text1, android.R.id.text2 }
 				);
 		setListAdapter(mAdapter);
-
-
-		mAdapter = new SimpleExpandableListAdapter(
-				this,
-				groupData,
-				android.R.layout.simple_expandable_list_item_1,
-				new String[] { NAME, IS_EVEN },
-				new int[] { android.R.id.text1, android.R.id.text2 },
-				childData,
-				android.R.layout.simple_expandable_list_item_2,
-				new String[] { NAME, IS_EVEN },
-				new int[] { android.R.id.text1, android.R.id.text2 }
-				);
-		setListAdapter(mAdapter);
-
 
 	}
 
