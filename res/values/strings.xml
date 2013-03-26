@@ -6,6 +6,7 @@
     <string name="menu_logout">Logout</string>
     <string name="menu_account">Account</string>
     <string name="menu_search">Search for Food</string>
+    <string name="menu_items">Food Menu</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>

@@ -236,6 +236,9 @@ public class FindFoodActivity extends FragmentActivity implements
 		case R.id.menu_logout:
 			logout();
 			return true;
+		case R.id.menu_items:
+			startActivity(new Intent(getApplicationContext(), SellerMenuExpandableListActivity.class));
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
