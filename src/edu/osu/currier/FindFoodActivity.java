@@ -95,22 +95,6 @@ public class FindFoodActivity extends FragmentActivity implements
 			// fill out the view
 			setContentView(R.layout.activity_find_food);
 			
-
-			ParseQuery query = new ParseQuery("Seller");
-			query.findInBackground(new FindCallback() {
-			     public void done(List<ParseObject> objects, ParseException e) {
-			         if (e == null) {
-			        	 System.out.println("Successful retrieval from server!");
-			        	 for(ParseObject seller: objects){
-			        		 sellerAddress.add(seller.getString("Address"));
-			        		 sellerName.add(seller.getString("publicName"));
-			        	 }
-			         } else {
-			        	 System.out.println("Whoopsie daisy, problem with the Parse server!");
-			         }
-			     }
-			 });
-			
 			// Set up the action bar to show a dropdown list.
 			final ActionBar actionBar = getActionBar();
 			actionBar.setDisplayShowTitleEnabled(false);
@@ -136,10 +120,7 @@ public class FindFoodActivity extends FragmentActivity implements
 			//close FindFood screen
 			finish();
 		}
-		
-		
-		
-		
+
 		Log.d(ACT,"Finishing onCreate...");
 	}
 
@@ -214,15 +195,8 @@ public class FindFoodActivity extends FragmentActivity implements
 		case 2:
 			fragmentManager.popBackStack();
 			
-			/*
-			ParseGeoPoint userLocation = (ParseGeoPoint) userObject.get("location");
-			ParseQuery query = new ParseQuery("PlaceObject");
-			query.whereNear("location", userLocation);
-			query.setLimit(10);
-			*/
-			
-			
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,sellerAddress) {
+			//Set the content for the list fragment
+			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,sellerAddress) {
 				//Sets the text color of the ListFragment to BLACK
 				@Override
 				public View getView(int position, View convertView, ViewGroup parent) {
@@ -231,13 +205,32 @@ public class FindFoodActivity extends FragmentActivity implements
 					return textView;
 				}
 			};
+			
+			//Grab the sellers' names and addresses from Parse
+			final ParseQuery query = new ParseQuery("Seller");
+
+			query.findInBackground(new FindCallback() {
+				public void done(List<ParseObject> objects, ParseException e) {
+					if (e == null) {
+						System.out.println("Successful retrieval from server!");
+						for(ParseObject seller: objects){
+							sellerAddress.add(seller.getString("Address"));
+							sellerName.add(seller.getString("publicName"));
+						}
+						adapter.notifyDataSetChanged();
+					} else {
+						System.out.println("Whoopsie daisy, problem with the Parse server!");
+					}
+				}
+			});
+			
 			ListFragment listFragment = new ListFragment() {
-				//Moves to the address listed in the ListFragment
+				//On clicking an item in the ListFragment, moves map to item's address
 				@Override
 				public void onListItemClick(ListView l, View v, int position, long id) {
 					List<Address> address = null;
 					try {
-						address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(sellerAddress[position], 1);
+						address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(sellerAddress.get(position), 1);
 						double lat = address.get(0).getLatitude();
 						double lon = address.get(0).getLongitude();
 						map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15));
@@ -248,6 +241,7 @@ public class FindFoodActivity extends FragmentActivity implements
 				}
 			};
 			listFragment.setListAdapter(adapter);
+			
 			final MapFragment partialMapFragment = new MapFragment();
 			
 			fragmentTransaction.add(R.id.mapComponent, partialMapFragment);
@@ -339,7 +333,6 @@ public class FindFoodActivity extends FragmentActivity implements
 	    				public void run() {
 	    					map = mapFragment.getMap();
 	    					if(map!=null) {
-	    						//map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
 	    						map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
 	    						map.addMarker(new MarkerOptions()
 	    						.position(new LatLng(latitude,longitude))
