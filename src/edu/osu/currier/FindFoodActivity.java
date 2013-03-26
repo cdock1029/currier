@@ -237,7 +237,7 @@ public class FindFoodActivity extends FragmentActivity implements
 				public void onListItemClick(ListView l, View v, int position, long id) {
 					List<Address> address = null;
 					try {
-						address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(addresses[position], 1);
+						address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(sellerAddress[position], 1);
 						double lat = address.get(0).getLatitude();
 						double lon = address.get(0).getLongitude();
 						map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15));
