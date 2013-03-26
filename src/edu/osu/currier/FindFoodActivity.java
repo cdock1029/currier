@@ -7,7 +7,12 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.parse.FindCallback;
 import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import android.annotation.TargetApi;
@@ -74,6 +79,11 @@ public class FindFoodActivity extends FragmentActivity implements
     	"252 East Maynard Avenue Columbus Ohio 43202",
     	"30 East Lane Avenue Columbus Ohio 43210"
     };
+    
+    //The List to contain names for sellers
+    List<String> sellerName = new ArrayList<String>();
+    //The list to contain address for sellers
+    List<String> sellerAddress = new ArrayList<String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +94,22 @@ public class FindFoodActivity extends FragmentActivity implements
 		if (currentUser != null) {
 			// fill out the view
 			setContentView(R.layout.activity_find_food);
+			
+
+			ParseQuery query = new ParseQuery("Seller");
+			query.findInBackground(new FindCallback() {
+			     public void done(List<ParseObject> objects, ParseException e) {
+			         if (e == null) {
+			        	 System.out.println("Successful retrieval from server!");
+			        	 for(ParseObject seller: objects){
+			        		 sellerAddress.add(seller.getString("Address"));
+			        		 sellerName.add(seller.getString("publicName"));
+			        	 }
+			         } else {
+			        	 System.out.println("Whoopsie daisy, problem with the Parse server!");
+			         }
+			     }
+			 });
 			
 			// Set up the action bar to show a dropdown list.
 			final ActionBar actionBar = getActionBar();
@@ -188,7 +214,15 @@ public class FindFoodActivity extends FragmentActivity implements
 		case 2:
 			fragmentManager.popBackStack();
 			
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,addresses) {
+			/*
+			ParseGeoPoint userLocation = (ParseGeoPoint) userObject.get("location");
+			ParseQuery query = new ParseQuery("PlaceObject");
+			query.whereNear("location", userLocation);
+			query.setLimit(10);
+			*/
+			
+			
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,sellerAddress) {
 				//Sets the text color of the ListFragment to BLACK
 				@Override
 				public View getView(int position, View convertView, ViewGroup parent) {
@@ -313,7 +347,7 @@ public class FindFoodActivity extends FragmentActivity implements
 	    						
 	    						//Adds markers for all the possible houses to order from
 	    						//Grabs the (lat, lon) from the String "location"
-	    						for(String location : addresses){
+	    						for(String location : sellerAddress){
 	    							List<Address> address = null;
 	    							try {
 										address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(location, 1);
