@@ -8,9 +8,9 @@
     <string name="menu_search">Search for Food</string>
     <string name="menu_items">Food Menu</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
+    <string name="title_section1">Main</string>
+    <string name="title_section2">Map View</string>
+    <string name="title_section3">Split View</string>
     <string name="bg_img_desc">Background Image</string>
     <string name="email">Email</string>
 	<string name="password">Password</string>
@@ -23,6 +23,7 @@
 	<string name="reg_new_acct">Register New Account</string>
 	<string name="login_title">Login to your Account</string>
 	<string name="register_title">Register New Account</string>
-	
+	<string name="menu_item_margin_left">10dp</string>
+	<color name="menu_background">#ABBDCD</color>
 
 </resources>
