@@ -1,7 +1,10 @@
 package edu.osu.currier;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -17,11 +20,15 @@ import com.parse.ParseUser;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -33,9 +40,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.app.FragmentTransaction;
 import android.app.FragmentManager;
@@ -50,13 +60,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
 
 public class FindFoodActivity extends FragmentActivity implements
-		ActionBar.OnNavigationListener, OnMapClickListener, LocationListener {
+		ActionBar.OnNavigationListener, OnMapClickListener, LocationListener, OnItemSelectedListener {
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -73,17 +84,6 @@ public class FindFoodActivity extends FragmentActivity implements
 	
 	private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-    
-    //A sample list of addresses for a ListFragment
-    static String[] addresses = new String[] {
-    	"252 East Maynard Avenue Columbus Ohio 43202",
-    	"30 East Lane Avenue Columbus Ohio 43210"
-    };
-    
-    //The List to contain names for sellers
-    List<String> sellerName = new ArrayList<String>();
-    //The list to contain address for sellers
-    List<String> sellerAddress = new ArrayList<String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +169,22 @@ public class FindFoodActivity extends FragmentActivity implements
 		FragmentManager fragmentManager = getFragmentManager();
 	    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 	    
+	    //The List to contain names for sellers
+	    final List<String> sellerName = new ArrayList<String>();
+	    //The list to contain address for sellers
+	    final List<String> sellerAddress = new ArrayList<String>();
+	    //The list to contain the sellers
+	    final List<Seller> sellers = new ArrayList<Seller>();
+	    ArrayList<String> spinnerArray = new ArrayList<String>( Arrays.asList("5 Kilometers","10 Kilometers", "20 Kilometers", "50 Kilometers", "All Locations"));
+	    
+	    locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 500.0f, this);
+	    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	    if(location!=null){
+	    	latitude = location.getLatitude();
+	    	longitude = location.getLongitude();
+	    }
+	    
 		switch(position){
 		//Dummy scenario
 		case 0:		
@@ -181,8 +197,10 @@ public class FindFoodActivity extends FragmentActivity implements
 		    fragmentTransaction.addToBackStack(null);
 		    fragmentTransaction.commit();
 			return true;
+			
 		//Display the neighborhood map
 		case 1:
+			
 			fragmentManager.popBackStack();
 			final MapFragment fullMapFragment = new MapFragment();
 		    fragmentTransaction.add(R.id.fullMapView, fullMapFragment);
@@ -190,41 +208,69 @@ public class FindFoodActivity extends FragmentActivity implements
 		    fragmentTransaction.commit();
 		    
 		    moveMap(fullMapFragment);
+		    addMarkers(fullMapFragment, sellers);
 			return true;
+			
 		//Display the neighborhood map on top of screen, list of addresses on bottom half of screen
 		case 2:
 			fragmentManager.popBackStack();
 			
-			//Set the content for the list fragment
-			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,sellerAddress) {
-				//Sets the text color of the ListFragment to BLACK
+			//The MapFragment component for the Map/List Screen
+			final MapFragment partialMapFragment = new MapFragment();
+			
+			//Settings for the ListFragment determined by the ArrayAdapter
+			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,sellerName) {
 				@Override
 				public View getView(int position, View convertView, ViewGroup parent) {
 					TextView textView = (TextView) super.getView(position, convertView, parent);
 					textView.setTextColor(android.graphics.Color.BLACK);
+					textView.setPadding(10, 20, 0, 10);
+					textView.setTextSize(18);
+					textView.setTypeface(Typeface.SERIF);
+					//textView.setBackgroundDrawable(getResources().getDrawable(R.drawable.textlines));
 					return textView;
 				}
 			};
 			
 			//Grab the sellers' names and addresses from Parse
 			final ParseQuery query = new ParseQuery("Seller");
-
 			query.findInBackground(new FindCallback() {
 				public void done(List<ParseObject> objects, ParseException e) {
 					if (e == null) {
-						System.out.println("Successful retrieval from server!");
 						for(ParseObject seller: objects){
+							Seller s = new Seller(seller.getString("publicName"));
+							s.setAddress(seller.getString("Address"));
+							List<Address> address = null;
+							try {
+								address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(seller.getString("Address"), 1);
+								double lat = address.get(0).getLatitude();
+								double lon = address.get(0).getLongitude();
+								s.setDistance(getDistance(latitude, longitude, lat, lon));
+								System.out.println(seller.getString("publicName") + getDistance(latitude, longitude, lat, lon));
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
 							sellerAddress.add(seller.getString("Address"));
 							sellerName.add(seller.getString("publicName"));
+							sellers.add(s);
 						}
+						//Sort the sellers by distance from the user
+						Collections.sort(sellers);
+						sellerAddress.clear();
+						sellerName.clear();
+						//Populate the Name and Address lists by the sorted sellers
+						for(Seller s: sellers) {
+							sellerName.add(s.getName());
+							sellerAddress.add(s.getAddress());
+						}
+						//Update the ListFragment's content
 						adapter.notifyDataSetChanged();
-					} else {
-						System.out.println("Whoopsie daisy, problem with the Parse server!");
-					}
-				}
-			});
+					}}}
+			);
 			
+			//The listFragment to display on the 1/2 map, 1/2 list screen view
 			ListFragment listFragment = new ListFragment() {
+				
 				//On clicking an item in the ListFragment, moves map to item's address
 				@Override
 				public void onListItemClick(ListView l, View v, int position, long id) {
@@ -234,23 +280,28 @@ public class FindFoodActivity extends FragmentActivity implements
 						double lat = address.get(0).getLatitude();
 						double lon = address.get(0).getLongitude();
 						map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15));
-
 					} catch (IOException e) {
 						e.printStackTrace();
-					}
-				}
+					}}
 			};
+
+			
+			//Sets the font, text color, and list content for the ListFragment
 			listFragment.setListAdapter(adapter);
 			
-			final MapFragment partialMapFragment = new MapFragment();
+			//Spinner spinner = new Spinner(this);
+			//ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, spinnerArray);
+			//spinner.setAdapter(spinnerArrayAdapter);
 			
+			//Add fragments to the fragmentTransaction, update screen view
 			fragmentTransaction.add(R.id.mapComponent, partialMapFragment);
 			fragmentTransaction.addToBackStack(null);
 			fragmentTransaction.add(R.id.list, listFragment);
 		    fragmentTransaction.addToBackStack(null);
 		    fragmentTransaction.commit();
-		    
+		    //Move the mapFragment to user's current location; add markers for the sellers
 		    moveMap(partialMapFragment);	    
+		    addMarkers(partialMapFragment, sellers);
 			return true;
 		default:
 			return true;
@@ -266,6 +317,9 @@ public class FindFoodActivity extends FragmentActivity implements
 			return true;
 		case R.id.menu_items:
 			startActivity(new Intent(getApplicationContext(), SellerMenuExpandableListActivity.class));
+			return true;
+		case R.id.menu_search:
+			System.out.println("Yup");
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -336,54 +390,81 @@ public class FindFoodActivity extends FragmentActivity implements
 	    						map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
 	    						map.addMarker(new MarkerOptions()
 	    						.position(new LatLng(latitude,longitude))
-	    						.title("User's Location"));
-	    						
-	    						//Adds markers for all the possible houses to order from
-	    						//Grabs the (lat, lon) from the String "location"
-	    						for(String location : sellerAddress){
-	    							List<Address> address = null;
-	    							try {
-										address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(location, 1);
-										double lat = address.get(0).getLatitude();
-										double lon = address.get(0).getLongitude();
-										map.addMarker(new MarkerOptions()
-										.position(new LatLng(lat, lon))
-										.title(location));
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-									
-	    						}
-	    					}
-	    					
+	    						.title("User's Location"));	    						
+	    					}	    					
 	    				}
 	    			});
 	    		}
 	    	}
 	    }, 0, 200);	    
 	}
+	
+	public void addMarkers(final MapFragment mapFragment, final List<Seller> sellers) {
+		final Timer timer = new Timer();
+	    timer.schedule(new TimerTask() {
+	    	@Override
+	    	public void run() {
+	    		if(sellers.size()>0) {
+	    			timer.cancel();
+	    			runOnUiThread(new Runnable() {
+	    				@Override
+	    				public void run() {
+	    					map = mapFragment.getMap();
+	    					if(map!=null) {
+	    						
+	    						//Adds markers for all the possible houses to order from
+	    						//Grabs the (lat, lon) from the String "location"
+	    						for(Seller s : sellers){
+	    							List<Address> address = null;
+	    							try {
+										address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(s.getAddress(), 1);
+										double lat = address.get(0).getLatitude();
+										double lon = address.get(0).getLongitude();
+										map.addMarker(new MarkerOptions()
+										.position(new LatLng(lat, lon))
+										.title(s.getName())
+										.snippet(s.getAddress()));
+									} catch (IOException e) {
+										e.printStackTrace();
+									}}}}});
+	    		}}}, 0, 200);	    
+	}
+	
+	//Finds approximate distance between two lat,lon coordinates
+	public double getDistance(double lat1, double lon1, double lat2, double lon2) {
+		double earthRadius = 6369;
+	    double dLat = Math.toRadians(lat2-lat1);
+	    double dLon = Math.toRadians(lon2-lon1);
+	    double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+	               Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+	               Math.sin(dLon/2) * Math.sin(dLon/2);
+	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	    double dist = earthRadius * c;
+
+	    return dist;
+	}
 
 	@Override
 	public void onLocationChanged(Location location) {
-		// TODO Auto-generated method stub
+		//  Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		// TODO Auto-generated method stub
+		//  Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		// TODO Auto-generated method stub
+		//  Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		// TODO Auto-generated method stub
+		//  Auto-generated method stub
 		
 	}
 	
@@ -394,19 +475,19 @@ public class FindFoodActivity extends FragmentActivity implements
 
 		@Override
 		public void onProviderDisabled(String provider) {
-			// TODO Auto-generated method stub
+			//  Auto-generated method stub
 			
 		}
 
 		@Override
 		public void onProviderEnabled(String provider) {
-			// TODO Auto-generated method stub
+			//  Auto-generated method stub
 			
 		}
 
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
-			// TODO Auto-generated method stub
+			//  Auto-generated method stub
 			
 		}
 	};
@@ -415,13 +496,26 @@ public class FindFoodActivity extends FragmentActivity implements
 		
 		@Override
 		public void onGpsStatusChanged(int event) {
-			// TODO Auto-generated method stub
+			//  Auto-generated method stub
 			
 		}
 	};
 
 	@Override
 	public void onMapClick(LatLng arg0) {
+		//  Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
+			long arg3) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
 		
 	}
