@@ -24,6 +24,6 @@
 	<string name="login_title">Login to your Account</string>
 	<string name="register_title">Register New Account</string>
 	<string name="menu_item_margin_left">10dp</string>
-	<color name="menu_background">#ABBDCD</color>
+	<color name="menu_background">#66ABBDCD</color>
 
 </resources>
