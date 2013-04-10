@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cart_footer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+     >
+    <!-- add buttons in here (checkout) etc. -->
+    <Button
+        android:id="@+id/submit_order_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/submit_order"
+        android:layout_centerInParent="true"
+        
+        />
+
+</RelativeLayout>

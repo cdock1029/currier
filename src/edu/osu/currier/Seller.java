@@ -1,6 +1,7 @@
 package edu.osu.currier;
 
 public class Seller implements Comparable<Seller>{
+	private String id;
 	private String name;
 	private String address;
 	private double distance;
@@ -28,6 +29,15 @@ public class Seller implements Comparable<Seller>{
 	public double getDistance() {
 		return distance;
 	}
+	
+	public void setId(String i) {
+		this.id = i;
+	}
+	
+	public String getId() {
+		return this.id;
+	}
+	
 
 	@Override
 	public int compareTo(Seller otherSeller) {

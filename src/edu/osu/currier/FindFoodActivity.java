@@ -44,12 +44,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.app.FragmentTransaction;
 import android.app.FragmentManager;
 import android.app.ListFragment;
+import android.app.WallpaperManager;
 import android.location.Geocoder;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -84,6 +86,7 @@ public class FindFoodActivity extends FragmentActivity implements
 	
 	private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    final private List<String> sellerId = new ArrayList<String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +97,7 @@ public class FindFoodActivity extends FragmentActivity implements
 		if (currentUser != null) {
 			// fill out the view
 			setContentView(R.layout.activity_find_food);
+			
 			
 			// Set up the action bar to show a dropdown list.
 			final ActionBar actionBar = getActionBar();
@@ -240,6 +244,7 @@ public class FindFoodActivity extends FragmentActivity implements
 						for(ParseObject seller: objects){
 							Seller s = new Seller(seller.getString("publicName"));
 							s.setAddress(seller.getString("Address"));
+							s.setId(seller.getString("objectId"));
 							List<Address> address = null;
 							try {
 								address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(seller.getString("Address"), 1);
@@ -252,6 +257,7 @@ public class FindFoodActivity extends FragmentActivity implements
 							}
 							sellerAddress.add(seller.getString("Address"));
 							sellerName.add(seller.getString("publicName"));
+							sellerId.add(seller.getString("objectId"));
 							sellers.add(s);
 						}
 						//Sort the sellers by distance from the user
@@ -284,10 +290,27 @@ public class FindFoodActivity extends FragmentActivity implements
 						e.printStackTrace();
 					}}
 			};
-
+			
 			
 			//Sets the font, text color, and list content for the ListFragment
 			listFragment.setListAdapter(adapter);
+			
+//			listFragment.getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//
+//				@Override
+//				public boolean onItemLongClick(AdapterView<?> av, View v,
+//						int pos, long id) {
+//					return onLongListItemClick(v,pos,id);
+//				}
+//				
+//				protected boolean onLongListItemClick(View v, int pos, long id) {
+//					Intent menu = new Intent(FindFoodActivity.this, SellerMenuActivity.class);
+//					menu.putExtra("objectId", sellerId.get(pos));
+//					startActivity(menu);
+//				    return true;
+//				}				
+//			});
+			
 			
 			//Spinner spinner = new Spinner(this);
 			//ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, spinnerArray);
@@ -316,7 +339,7 @@ public class FindFoodActivity extends FragmentActivity implements
 			logout();
 			return true;
 		case R.id.menu_items:
-			startActivity(new Intent(getApplicationContext(), SellerMenuExpandableListActivity.class));
+			startActivity(new Intent(getApplicationContext(), SellerMenuActivity.class));
 			return true;
 		case R.id.menu_search:
 			System.out.println("Yup");

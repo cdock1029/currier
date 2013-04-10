@@ -24,7 +24,6 @@
     <string name="login_title">Login to your Account</string>
     <string name="register_title">Register New Account</string>
     <string name="menu_item_margin_left">10dp</string>
-    <color name="menu_background">#66ABBDCD</color>
     <string name="title_activity_about">AboutActivity</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="balance">Balance</string>
@@ -35,6 +34,10 @@
     <string name="save_profile">Save Profile</string>
     <string name="discard_change">Discard Change</string>
     <string name="title_activity_edit_profile">Edit Profile Activity</string>
+    <string name="submit_order">Submit Order</string>
+    <string name="add_cart">Add to Cart</string>
+    <string name="title_activity_cart">Order Details</string>
 
-
+	<color name="menu_background">#66ABBDCD</color>
+	<color name="button_background">#44EB8540</color>
 </resources>
