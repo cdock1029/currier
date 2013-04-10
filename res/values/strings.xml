@@ -13,17 +13,28 @@
     <string name="title_section3">Split View</string>
     <string name="bg_img_desc">Background Image</string>
     <string name="email">Email</string>
-	<string name="password">Password</string>
-	<string name="confirm">Confirm Password</string>
-	<string name="login">Login</string>
-	<string name="new_register">New to Currier? Register here</string>
-	<string name="first_name">First Name</string>
-	<string name="last_name">Last Name</string>
-	<string name="login_already">Already have an account? Login here</string>
-	<string name="reg_new_acct">Register New Account</string>
-	<string name="login_title">Login to your Account</string>
-	<string name="register_title">Register New Account</string>
-	<string name="menu_item_margin_left">10dp</string>
-	<color name="menu_background">#66ABBDCD</color>
+    <string name="password">Password</string>
+    <string name="confirm">Confirm Password</string>
+    <string name="login">Login</string>
+    <string name="new_register">New to Currier? Register here</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="login_already">Already have an account? Login here</string>
+    <string name="reg_new_acct">Register New Account</string>
+    <string name="login_title">Login to your Account</string>
+    <string name="register_title">Register New Account</string>
+    <string name="menu_item_margin_left">10dp</string>
+    <color name="menu_background">#66ABBDCD</color>
+    <string name="title_activity_about">AboutActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="balance">Balance</string>
+    <string name="phone">Phone Number</string>
+    <string name="address">Address</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="back">Back</string>
+    <string name="save_profile">Save Profile</string>
+    <string name="discard_change">Discard Change</string>
+    <string name="title_activity_edit_profile">Edit Profile Activity</string>
+
 
 </resources>
