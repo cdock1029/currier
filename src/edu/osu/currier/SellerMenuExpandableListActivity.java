@@ -15,11 +15,15 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
 
 import android.app.ProgressDialog;
+import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -30,22 +34,25 @@ import android.widget.Toast;
 
 
 public class SellerMenuExpandableListActivity extends ExpandableListActivity {
-	final String[] grpKeys = new String[] {"MENU"};
-	final String[] chKeys = new String[] {"NAME","DESC","PRICE"};
+	
 	ExpandableListAdapter mAdapter;
+	private static Drawable background;
 	private List<ParseObject> menuItems;
 	private Dialog progressDialog;
+	private String sellerId = "3djgQh1VTZ";
 
 	private class RemoteDataTask extends AsyncTask<Void,Void,Void> {
 
 		@Override
 		protected Void doInBackground(Void... arg0) {
 			ParseQuery innerInnerSellerQuery = new ParseQuery("Seller");
-			innerInnerSellerQuery.whereEqualTo("objectId", "9ML249tNNY");
-
+			//innerInnerSellerQuery.whereEqualTo("objectId", "9ML249tNNY");
+			//innerInnerSellerQuery.whereEqualTo("objectId", "3djgQh1VTZ");
+			innerInnerSellerQuery.whereEqualTo("objectId", sellerId);
+			
 			ParseQuery innerMenuQuery = new ParseQuery("Menu");
 			innerMenuQuery.whereMatchesQuery("seller", innerInnerSellerQuery);
-
+			
 			ParseQuery query = new ParseQuery("MenuItems");
 			query.whereMatchesQuery("menu", innerMenuQuery);
 			query.include("menu.seller");
@@ -70,6 +77,8 @@ public class SellerMenuExpandableListActivity extends ExpandableListActivity {
 			List<Map<String,String>> groupDataX = new ArrayList<Map<String,String>>();
 			List<List<Map<String,String>>> childDataX = new ArrayList<List<Map<String,String>>>();
 			Map<String, List<Map<String,String>>> temp = new LinkedHashMap<String, List<Map<String,String>>>();
+			final String[] grpKeys = new String[] {"MENU"};
+			final String[] chKeys = new String[] {"NAME","DESC","PRICE"};
 			
 			Set<String> menuSet = new HashSet<String>(4); //Set of menu names.
 			Log.d("parse", "SMELA: seller name: " + menuItems.get(0).getParseObject("menu").getParseObject("seller").getString("publicName"));
@@ -77,28 +86,24 @@ public class SellerMenuExpandableListActivity extends ExpandableListActivity {
 			for (ParseObject menuItem : menuItems) {
 				ParseObject menu = menuItem.getParseObject("menu");
 				String menuTitle = menu.getString("title");
-				
 				if (menuSet.contains(menuTitle) == false) {
 					menuSet.add(menuTitle);
 					Log.d("parse", "menu title: " + menuTitle);
 					Map<String, String> grp = new HashMap<String, String>(1);
-					grp.put("MENU", menuTitle); // define each menu
+					grp.put(grpKeys[0], menuTitle); // define each menu
 					groupDataX.add(grp); // put menu in group array
 	
 					temp.put(menuTitle, new ArrayList<Map<String,String>>());
 				}
-				
 				Map<String, String> itemParts = new HashMap<String,String>();
-				itemParts.put("PRICE", menuItem.getString("price"));
-				itemParts.put("NAME", menuItem.getString("name"));
-				itemParts.put("DESC", menuItem.getString("description"));
+				itemParts.put(chKeys[0], menuItem.getString("name"));
+				itemParts.put(chKeys[1], menuItem.getString("description"));
+				itemParts.put(chKeys[2], String.valueOf(menuItem.getDouble("price")));
 				temp.get(menuTitle).add(itemParts);
 			}
-			
 			for (Map.Entry<String, List<Map<String,String>>> entry : temp.entrySet()) {
 				childDataX.add(entry.getValue());
 			}
-		
 			mAdapter = new SimpleExpandableListAdapter(
 					SellerMenuExpandableListActivity.this,			//context
 					groupDataX,										//list of maps
@@ -119,22 +124,32 @@ public class SellerMenuExpandableListActivity extends ExpandableListActivity {
 	
 	
 	
-	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//setContentView(R.layout.activity_menu);
+		background = getResources().getDrawable(R.drawable.tiles);
+		getExpandableListView().setBackgroundDrawable(background);
+		//getExpandableListView().setTextFilterEnabled(true);
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			sellerId = extras.getString("objectId");
+		}
 		new RemoteDataTask().execute();
-	
 	}
 
 	@Override
 	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition,
 			long id) {
-
-		Toast.makeText(SellerMenuExpandableListActivity.this, "Clicked On Child",
-				Toast.LENGTH_SHORT).show();
-		return true;
-
+		super.onChildClick(parent, v, groupPosition, childPosition, id);
+		//String str = "Row id: " + id + " grpPos: " + groupPosition + " childPos: " + childPosition;
+		//Toast.makeText(SellerMenuExpandableListActivity.this, str,Toast.LENGTH_SHORT).show();
+		String str = (String)((Map<String,String>)mAdapter.getChild(groupPosition, childPosition)).get("NAME");
+		
+		Toast.makeText(SellerMenuExpandableListActivity.this, str,Toast.LENGTH_SHORT).show();
+		
+		return super.onChildClick(parent, v, groupPosition, childPosition, id);
 	}
 
 
