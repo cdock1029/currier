@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/cart_footer"
-    android:layout_width="match_parent"
+    android:id="@+id/menu_footer"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:padding="20dp"
      >
-     
-     <RelativeLayout 
+   <RelativeLayout 
        	android:layout_centerInParent="true"
        	android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/dark_gray"
        >
-       
+  
     <!-- add buttons in here (checkout) etc. -->
     <Button
-        android:id="@+id/submit_order_button"
+        android:id="@+id/add_cart_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/submit_order"
+        android:text="@string/add_cart"
         android:layout_centerInParent="true"
-        android:gravity="center"
         />
-    </RelativeLayout>
+    
+     </RelativeLayout>
+        
+        
+    
 
 </RelativeLayout>

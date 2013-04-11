@@ -3,23 +3,59 @@
     android:id="@+id/cart_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="false"
     android:background="@drawable/tiles"
      >
+     
+    <include
+        android:id="@+id/cart_footer"
+        layout="@layout/cart_footer"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="20dp"
+        />
     
     <ListView 
         android:id="@+id/cart_list"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="35dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="@drawable/list_background"
         	/>
-    
-    <ListView
-        android:id="@+id/total_list"
-        android:layout_width="match_parent"
+    <RelativeLayout 
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
- 			/>
-       
- 	<include layout="@layout/cart_footer" 
-        android:layout_alignParentBottom="true"
-         />    		
+        
+        android:layout_above="@id/cart_footer"
+       	android:layout_alignLeft="@id/cart_list"
+       	android:layout_alignRight="@id/cart_list"
+        android:background="@drawable/list_background"
+        android:padding="10dp"
+        android:layout_margin="20dp"
+        >
+        <TextView android:id="@+id/total_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:gravity="center"
+            android:text="@string/total_label_text"
+            android:textStyle="bold"
+            />
+        <TextView android:id="@+id/total_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:textStyle="bold"
+            />
+        
+    </RelativeLayout>
     
 </RelativeLayout>

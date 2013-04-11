@@ -37,7 +37,13 @@
     <string name="submit_order">Submit Order</string>
     <string name="add_cart">Add to Cart</string>
     <string name="title_activity_cart">Order Details</string>
-
-	<color name="menu_background">#66ABBDCD</color>
+	<string name="total_label_text">Total Price:</string>
+    
+	<color name="menu_background_unselected">#66ABBDCD</color>
+	<color name="menu_background_selected">#EE117FAB</color>
 	<color name="button_background">#44EB8540</color>
+	<color name="dark_gray">#666666</color>
+	<color name="light_gray">#22AAAAAA</color>
+	<color name="grad_start">#99445577</color>
+	<color name="grad_end">#99EEEEFF</color>
 </resources>

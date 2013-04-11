@@ -3,13 +3,17 @@
     android:id="@+id/cartItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="10dp" >
+    android:paddingTop="9dp"
+    android:paddingBottom="8dp"
+    >
     
     <TextView 
         android:id="@+id/cart_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
+        android:textIsSelectable="true"
+        android:textSize="16sp"
         />    
         
     
@@ -17,7 +21,8 @@
         android:id="@+id/cart_price"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@id/cart_name"
+        android:layout_alignParentRight="true"
+        android:textIsSelectable="true"
         />
     
 </RelativeLayout>
