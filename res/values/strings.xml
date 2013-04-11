@@ -4,13 +4,13 @@
     <string name="app_name">Currier</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_logout">Logout</string>
-    <string name="menu_account">Account</string>
+    <string name="menu_profile">Profile</string>
     <string name="menu_search">Search for Food</string>
     <string name="menu_items">Food Menu</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_section1">Main</string>
+    <string name="title_section1">Split View</string>
     <string name="title_section2">Map View</string>
-    <string name="title_section3">Split View</string>
+    <string name="title_section3">Nothing Here Yet</string>
     <string name="bg_img_desc">Background Image</string>
     <string name="email">Email</string>
     <string name="password">Password</string>

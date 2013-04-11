@@ -113,7 +113,7 @@ public class FindFoodActivity extends FragmentActivity implements
 							android.R.id.text1, new String[] {
 									getString(R.string.title_section1),
 									getString(R.string.title_section2),
-									getString(R.string.title_section3), }), this);
+									}), this);
 			
 		} else {
 			// show the signup or login screen
@@ -160,10 +160,9 @@ public class FindFoodActivity extends FragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		boolean result = super.onCreateOptionsMenu(menu);
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.menu_find_food, menu);
-		return result;
+		return true;
 	}
 
 	@Override
@@ -191,7 +190,7 @@ public class FindFoodActivity extends FragmentActivity implements
 	    
 		switch(position){
 		//Dummy scenario
-		case 0:		
+		case 2:		
 			fragmentManager.popBackStack();
 			Fragment fragment = new DummySectionFragment();
 			Bundle args = new Bundle();
@@ -216,7 +215,7 @@ public class FindFoodActivity extends FragmentActivity implements
 			return true;
 			
 		//Display the neighborhood map on top of screen, list of addresses on bottom half of screen
-		case 2:
+		case 0:
 			fragmentManager.popBackStack();
 			
 			//The MapFragment component for the Map/List Screen
@@ -343,6 +342,9 @@ public class FindFoodActivity extends FragmentActivity implements
 			return true;
 		case R.id.menu_search:
 			System.out.println("Yup");
+			return true;
+		case R.id.menu_profile:
+			startActivity(new Intent(this, ProfileActivity.class));
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

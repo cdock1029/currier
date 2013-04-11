@@ -8,8 +8,8 @@
         android:showAsAction="ifRoom|collapseActionView"
         />
     <item
-        android:id="@+id/menu_account"
-        android:title="@string/menu_account"
+        android:id="@+id/menu_profile"
+        android:title="@string/menu_profile"
         android:icon="@drawable/ic_menu_friendslist"
         android:showAsAction="ifRoom|withText"
         />
