@@ -24,18 +24,12 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 	private String mLastName;
 	private String mPhone;
 	private String mAddress;
-	//private String mEmail;
-	//private String mPassword;
-	//private String mConfirm;
 
 	//UI references.
 	private EditText mFNameEditableField;
 	private EditText mLNameEditableField;
 	private EditText mPhoneEditableField;
 	private EditText mAddressEditableField;
-	//private EditText mEmailEditableField;
-	//private EditText mPasswordEditableField;
-	//private EditText mConfirmEditableField;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +42,12 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 		mLNameEditableField = (EditText)findViewById(R.id.prof_lastname);
 		mPhoneEditableField = (EditText)findViewById(R.id.prof_phone);
 		mAddressEditableField = (EditText)findViewById(R.id.prof_address);
-		//mEmailEditableField = (EditText)findViewById(R.id.prof_email);
-		//mPasswordEditableField = (EditText)findViewById(R.id.prof_password);
-		//mConfirmEditableField = (EditText)findViewById(R.id.prof_confirm);
+		
+		// Populate fields with data from database
+		mFNameEditableField.setText(mUser.getString("firstName"));
+		mLNameEditableField.setText(mUser.getString("lastName"));
+		mPhoneEditableField.setText(mUser.getString("phoneNumber"));
+		mAddressEditableField.setText(mUser.getString("address"));
 		
 		// Save Profile button
 		View btnSave = (Button)findViewById(R.id.btnSave);
@@ -69,7 +66,7 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 		this.mPhoneEditableField.setError(null);
 		this.mAddressEditableField.setError(null);
 
-		//Store strings at time of registration attempt.
+		//Store strings at time of saving profile attempt.
 		this.mFirstName = this.mFNameEditableField.getText().toString();
 		this.mLastName = this.mLNameEditableField.getText().toString();
 		this.mPhone = this.mPhoneEditableField.getText().toString();
@@ -78,7 +75,7 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 		boolean cancel = false;
 		View focusView = null;
 		
-		/*// Check for a valid Address
+		// Check for a valid Address
 		if (TextUtils.isEmpty(mAddress)) {
 			mAddressEditableField.setError(getString(R.string.error_field_required));
 			focusView = mAddressEditableField;
@@ -104,7 +101,7 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 			mFNameEditableField.setError(getString(R.string.error_field_required));
 			focusView = mFNameEditableField;
 			cancel = true;
-		}*/
+		}
 		
 		if (cancel) {
 			//There was an error; don't attempt register..focus the first form field
@@ -114,29 +111,12 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 			mUser.put("firstName", this.mFirstName);
 			mUser.put("lastName", this.mLastName);
 			mUser.put("phoneNumber", this.mPhone);
-			/*mUser.signUpInBackground(new SignUpCallback() {
-
-				@Override
-				public void done(ParseException e) {
-					if (e == null) {
-						//Worked
-						Log.d(ACT, "User: " + mEmail + " has registered.");
-						//changed: added below
-						
-						// Launch Dashboard Screen
-                        Intent findfood = new Intent(getApplicationContext(), FindFoodActivity.class);
-                        // Close all views before launching Dashboard
-                        findfood.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(findfood);
-                        // Close Registration Screen
-						finish();
-					} else {
-						//look at ParseException
-						Log.d(ACT, "Error: user " + mEmail + " failed registration.");
-					}
-					
-				}
-			});*/
+			mUser.put("address", this.mAddress);
+			
+			mUser.saveInBackground();
+			
+			startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+			finish();
 		}
 		
 	}
@@ -183,10 +163,9 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 		switch(v.getId()) {
 		case R.id.btnSave:
 			this.updateProfile();
-			//startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
-			//finish();
 			break;
 		case R.id.btnDiscard:
+			startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
 			finish();
 			break;
 		}

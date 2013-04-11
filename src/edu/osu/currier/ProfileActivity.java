@@ -1,8 +1,11 @@
 package edu.osu.currier;
 
+import com.parse.ParseUser;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -10,15 +13,13 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class ProfileActivity extends Activity implements OnClickListener {
-
-	// Values for fields at the time of saving profile attempt.
-	private String mFirstName;
-	private String mLastName;
-	private String mEmail;
-	private String mPhone;
-	private String mAddress;
+	private static final String ACT = "ProfileActivity";
+	
+	//Parse User.
+	private ParseUser mUser;
 
 	//UI references.
+	private EditText mBalanceEditableField;
 	private EditText mFNameEditableField;
 	private EditText mLNameEditableField;
 	private EditText mEmailEditableField;
@@ -28,27 +29,55 @@ public class ProfileActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_profile);
 		
-		mFNameEditableField = (EditText)findViewById(R.id.prof_firstname);
-		mLNameEditableField = (EditText)findViewById(R.id.prof_lastname);
-		mEmailEditableField = (EditText)findViewById(R.id.prof_email);
-		mPhoneEditableField = (EditText)findViewById(R.id.prof_phone);
-		mAddressEditableField = (EditText)findViewById(R.id.prof_address);
+		mUser = ParseUser.getCurrentUser();
+		if (mUser != null) {
+			setContentView(R.layout.activity_profile);
+			
+			//mOjbect = ParseUser.getQuery();
+			
+			mBalanceEditableField = (EditText)findViewById(R.id.prof_balance);
+			mFNameEditableField = (EditText)findViewById(R.id.prof_firstname);
+			mLNameEditableField = (EditText)findViewById(R.id.prof_lastname);
+			mEmailEditableField = (EditText)findViewById(R.id.prof_email);
+			mPhoneEditableField = (EditText)findViewById(R.id.prof_phone);
+			mAddressEditableField = (EditText)findViewById(R.id.prof_address);
+			
+			// Set field to be uneditable in this activity
+			mBalanceEditableField.setKeyListener(null);
+			mFNameEditableField.setKeyListener(null);
+			mLNameEditableField.setKeyListener(null);
+			mEmailEditableField.setKeyListener(null);
+			mPhoneEditableField.setKeyListener(null);
+			mAddressEditableField.setKeyListener(null);
+			
+			// Populate fields with data from database
+			//mBalanceEditableField.setText(mUser.getNumber("balance").toString());
+			mFNameEditableField.setText(mUser.getString("firstName"));
+			mLNameEditableField.setText(mUser.getString("lastName"));
+			mEmailEditableField.setText(mUser.getEmail());
+			mPhoneEditableField.setText(mUser.getString("phoneNumber"));
+			mAddressEditableField.setText(mUser.getString("address"));
+			
+			// Save Profile button
+			View btnEdit = (Button)findViewById(R.id.btnEdit);
+			btnEdit.setOnClickListener(this);
+			
+			// Discard Changes button
+			View btnDiscard = (Button)findViewById(R.id.btnBack);
+			btnDiscard.setOnClickListener(this);
+			
+		} else {
+			// show the signup or login screen
+			Intent login = new Intent(getApplicationContext(), LoginActivity.class);
+			// look for LoginActivity already running and clear out Act's above it.
+			login.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(login);
+			//close FindFood screen
+			finish();
+		}
 		
-		// Testing setting editable fields
-		// Get the message from the intent
-		//Intent intent = getIntent();
-		//String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
-		//mFNameEditableField.setText(message);
-		
-		// Save Profile button
-		View btnEdit = (Button)findViewById(R.id.btnEdit);
-		btnEdit.setOnClickListener(this);
-		
-		// Discard Changes button
-		View btnDiscard = (Button)findViewById(R.id.btnBack);
-		btnDiscard.setOnClickListener(this);
+		Log.d(ACT,"Finishing onCreate...");
 	}
 
 	@Override
@@ -63,7 +92,7 @@ public class ProfileActivity extends Activity implements OnClickListener {
 		switch(v.getId()) {
 		case R.id.btnEdit:
 			startActivity(new Intent(getApplicationContext(), EditProfileActivity.class));
-			//finish();
+			finish();
 			break;
 		case R.id.btnBack:
 			finish();
