@@ -34,10 +34,12 @@
     <string name="save_profile">Save Profile</string>
     <string name="discard_change">Discard Change</string>
     <string name="title_activity_edit_profile">Edit Profile Activity</string>
-    <string name="submit_order">Submit Order</string>
+    <string name="submit_order">Submit</string>
     <string name="add_cart">Add to Cart</string>
     <string name="title_activity_cart">Order Details</string>
 	<string name="total_label_text">Total Price:</string>
+    <string name="cancel_order">Cancel</string>
+	<string name="order_complete">Order Complete.\nEnjoy Your Food!</string>
     
 	<color name="menu_background_unselected">#66ABBDCD</color>
 	<color name="menu_background_selected">#EE117FAB</color>

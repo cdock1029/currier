@@ -5,17 +5,50 @@
     android:layout_height="match_parent"
     android:fillViewport="false"
     android:background="@drawable/tiles"
+    android:divider="?android:attr/dividerHorizontal"
+    android:showDividers="middle"
      >
      
-    <include
+    <!-- <include
         android:id="@+id/cart_footer"
         layout="@layout/cart_footer"
         android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_margin="20dp"
+       
+        /> -->
+    <LinearLayout
+        android:id="@+id/cart_footer"
+        android:layout_alignParentBottom="true"
+        style="?android:attr/buttonBarStyle"
+       	android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/dark_gray"
+        android:layout_marginTop="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+       >
+       
+    <!-- add buttons in here (checkout) etc. -->
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:id="@+id/submit_order_button"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/submit_order"
         />
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:id="@+id/cancel_order_button"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:text="@string/cancel_order"
+        />
+    
+    </LinearLayout>
     
     <ListView 
         android:id="@+id/cart_list"
@@ -32,7 +65,6 @@
     <RelativeLayout 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        
         android:layout_above="@id/cart_footer"
        	android:layout_alignLeft="@id/cart_list"
        	android:layout_alignRight="@id/cart_list"

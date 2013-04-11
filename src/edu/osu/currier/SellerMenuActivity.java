@@ -200,6 +200,7 @@ public class SellerMenuActivity extends ExpandableListActivity {
 				i.putStringArrayListExtra("names", _names);
 				i.putStringArrayListExtra("prices", _prices);
 				i.putExtra("total", money.getAmount().toString());
+				i.putExtra("sellerId", sellerId);
 				startActivity(i);	
 			}
 		});
