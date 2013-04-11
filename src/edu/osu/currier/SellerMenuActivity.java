@@ -1,5 +1,4 @@
 package edu.osu.currier;
-import java.lang.reflect.Array;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +16,8 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.codec.binary.StringUtils;
+
+import edu.osu.currier.library.HelperFunctions;
 
 
 import android.annotation.TargetApi;
@@ -62,10 +63,11 @@ public class SellerMenuActivity extends ExpandableListActivity {
 	private static int UNSEL; 
 	private Button orderButton;
 	private Map<String, String[]> selections = new HashMap<String, String[]>();
-	Money money = Money.parse("USD 0.00");
+	Money money = Money.parse(HelperFunctions.country.Locality + "0.00");
 	private String sellerId = "3djgQh1VTZ";
 	private String sellerName = "Best in Town";
-	static NumberFormat nf = NumberFormat.getCurrencyInstance();
+	//format currenty correctly
+	static NumberFormat nf = NumberFormat.getCurrencyInstance(HelperFunctions.country.LOC);
 	
 	private class RemoteDataTask extends AsyncTask<Void,Void,Void> {
 
@@ -192,7 +194,7 @@ public class SellerMenuActivity extends ExpandableListActivity {
 				Intent i = new Intent(SellerMenuActivity.this, CartActivity.class);
 				i.putStringArrayListExtra("ids", new ArrayList<String>(selections.keySet()));
 				for (Entry<String, String[]> entry : selections.entrySet()) {
-					money = money.plus(Money.parse("USD " + entry.getValue()[1]));
+					money = money.plus(Money.parse(HelperFunctions.country.Locality + entry.getValue()[1]));
 					//Log.d("MENU", "Money during submit: " + money.getAmount());
 					_prices.add(entry.getValue()[1]);
 					_names.add(entry.getValue()[0]);
@@ -206,6 +208,7 @@ public class SellerMenuActivity extends ExpandableListActivity {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition,
 			long id) {

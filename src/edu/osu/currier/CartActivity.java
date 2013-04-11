@@ -32,6 +32,8 @@ import com.parse.ParseObject;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
+import edu.osu.currier.library.HelperFunctions;
+
 public class CartActivity extends Activity {
 	static final String TAG = "CART";
 	List<String> names;
@@ -64,7 +66,7 @@ public class CartActivity extends Activity {
 			order.put("userId", ParseObject.createWithoutData("_User", user.getObjectId()));
 			order.put("sellerId", ParseObject.createWithoutData("Seller", sellerId));
 			order.put("total", total);
-			Money money = Money.parse(Configurator.country.Locality + total);
+			Money money = Money.parse(HelperFunctions.country.Locality + total);
 			ParseRelation relation = order.getRelation("menuItems");
 			for (String id : ids) {
 				relation.add(ParseObject.createWithoutData("MenuItems", id));

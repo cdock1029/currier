@@ -1,6 +1,13 @@
 package edu.osu.currier;
 
+import java.text.NumberFormat;
+
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
+
+import edu.osu.currier.library.HelperFunctions;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -14,6 +21,8 @@ import android.widget.EditText;
 
 public class ProfileActivity extends Activity implements OnClickListener {
 	private static final String ACT = "ProfileActivity";
+	//format currenty correctly
+	static NumberFormat nf = NumberFormat.getCurrencyInstance(HelperFunctions.country.LOC);
 	
 	//Parse User.
 	private ParseUser mUser;
@@ -31,6 +40,7 @@ public class ProfileActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		
 		mUser = ParseUser.getCurrentUser();
+		
 		if (mUser != null) {
 			setContentView(R.layout.activity_profile);
 			
@@ -51,22 +61,29 @@ public class ProfileActivity extends Activity implements OnClickListener {
 			mPhoneEditableField.setKeyListener(null);
 			mAddressEditableField.setKeyListener(null);
 			
-			// Populate fields with data from database
-			//mBalanceEditableField.setText(mUser.getNumber("balance").toString());
-			mFNameEditableField.setText(mUser.getString("firstName"));
-			mLNameEditableField.setText(mUser.getString("lastName"));
-			mEmailEditableField.setText(mUser.getEmail());
-			mPhoneEditableField.setText(mUser.getString("phoneNumber"));
-			mAddressEditableField.setText(mUser.getString("address"));
-			
-			// Save Profile button
-			View btnEdit = (Button)findViewById(R.id.btnEdit);
-			btnEdit.setOnClickListener(this);
-			
-			// Discard Changes button
-			View btnDiscard = (Button)findViewById(R.id.btnBack);
-			btnDiscard.setOnClickListener(this);
-			
+			mUser.fetchInBackground(new GetCallback() {
+				@Override
+				public void done(ParseObject object, ParseException e) {
+					if (object != null) {
+						mUser = (ParseUser) object;
+					}
+					// Populate fields with data from database
+					mBalanceEditableField.setText(nf.format(mUser.getNumber("balance")));
+					mFNameEditableField.setText(mUser.getString("firstName"));
+					mLNameEditableField.setText(mUser.getString("lastName"));
+					mEmailEditableField.setText(mUser.getEmail());
+					mPhoneEditableField.setText(mUser.getString("phoneNumber"));
+					mAddressEditableField.setText(mUser.getString("address"));
+					
+					// Save Profile button
+					View btnEdit = (Button)findViewById(R.id.btnEdit);
+					btnEdit.setOnClickListener(ProfileActivity.this);
+					
+					// Discard Changes button
+					View btnDiscard = (Button)findViewById(R.id.btnBack);
+					btnDiscard.setOnClickListener(ProfileActivity.this);
+				}
+			});
 		} else {
 			// show the signup or login screen
 			Intent login = new Intent(getApplicationContext(), LoginActivity.class);
