@@ -112,10 +112,17 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 			mUser.put("lastName", this.mLastName);
 			mUser.put("phoneNumber", this.mPhone);
 			mUser.put("address", this.mAddress);
-			
 			mUser.saveInBackground();
 			
-			startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+			Bundle bundle = new Bundle();
+			bundle.putString("firstName", this.mFirstName);
+			bundle.putString("lastName", this.mLastName); 
+			bundle.putString("phoneNumber", this.mPhone);
+			bundle.putString("address", this.mAddress);
+			
+			Intent profile = new Intent();
+			profile.putExtras(bundle);
+			setResult(Activity.RESULT_OK, profile);
 			finish();
 		}
 		
@@ -165,7 +172,10 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 			this.updateProfile();
 			break;
 		case R.id.btnDiscard:
-			startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+			Intent profile = new Intent();
+			//profile.addFlags(flags)
+			setResult(Activity.RESULT_CANCELED, profile);
+			//startActivity(profile);
 			finish();
 			break;
 		}
