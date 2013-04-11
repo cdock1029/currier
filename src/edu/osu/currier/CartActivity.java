@@ -19,6 +19,7 @@ import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -34,7 +35,7 @@ import com.parse.ParseUser;
 
 import edu.osu.currier.library.HelperFunctions;
 
-public class CartActivity extends Activity {
+public class CartActivity extends Activity implements OnClickListener {
 	static final String TAG = "CART";
 	List<String> names;
 	List<String> prices;
@@ -122,14 +123,11 @@ public class CartActivity extends Activity {
 
 	private void setUpButton() {
 		Button submit = (Button)findViewById(R.id.submit_order_button);
-		submit.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				new RemoteDataTask().execute();
-			}
-			
-		});
+		submit.setOnClickListener(this);
+		
+		Button cancel = (Button)findViewById(R.id.cancel_order_button);
+		cancel.setOnClickListener(this);
+		
 		builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.order_complete).setTitle("Thank You!").setCancelable(false);
 		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -162,6 +160,19 @@ public class CartActivity extends Activity {
 				));
 		TextView v = (TextView)findViewById(R.id.total_value);
 		v.setText(total);
+	}
+
+
+	@Override
+	public void onClick(View v) {
+		switch(v.getId()) {
+		case (R.id.submit_order_button):
+			new RemoteDataTask().execute();
+			break;
+		case (R.id.cancel_order_button):
+			finish();
+		}
+		
 	}
 
 
