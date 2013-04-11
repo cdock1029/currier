@@ -14,6 +14,12 @@
         android:showAsAction="ifRoom|withText"
         />
     <item
+        android:id="@+id/menu_rate"
+        android:title="@string/menu_rate"
+        android:icon="@drawable/ic_menu_star"
+        android:showAsAction="ifRoom|withText"
+        />
+    <item
         android:id="@+id/menu_items"
         android:title="@string/menu_items"
         android:icon="@android:drawable/ic_menu_agenda"

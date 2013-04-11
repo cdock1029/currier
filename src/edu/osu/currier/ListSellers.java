@@ -41,11 +41,7 @@ public class ListSellers extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list_sellers);
 
-		// set the application id and client key for the parse database
-		Parse.initialize(this, "mGgQCNePMku0rAuWaV8vIpJJ2Qd4PrzmzTnxzdB8",
-				"WmYOeKOFUh7v3UVk6SKICi7md3Wx0FfFsU69NgMa");
-
-		getUserId();
+		mUserId = ParseUser.getCurrentUser();
 
 		getSellersData();
 
@@ -76,8 +72,6 @@ public class ListSellers extends Activity {
 						mRating = new float[sellers.size()];
 
 						TextView hello = (TextView) findViewById(R.id.hello);
-						hello.setText("Your nearby sellers:");
-
 						for (int i = 0; i < sellers.size(); i++) {
 
 							tr[i] = new TableRow(getApplicationContext());
@@ -186,15 +180,6 @@ public class ListSellers extends Activity {
 		});
 	}
 
-	private void getUserId() {
-		// hard coded user for now
-		try {
-			mUserId = ParseUser.logIn("newuser@gmail.com", "abc");
-			Log.d(TAG, "userid is fine");
-		} catch (ParseException e) {
-			Log.d(TAG, e.getMessage());
-		}
-	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

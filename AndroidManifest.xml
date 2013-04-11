@@ -55,27 +55,52 @@
             android:windowSoftInputMode="stateHidden|adjustResize" >
         </activity>
 
-        <!-- Entry for MenuActivity.class -->
+        <!-- Entry for SellerMenuActivity.class -->
         <activity
             android:name="edu.osu.currier.SellerMenuActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden|adjustResize" >
         </activity>
-        <activity
-            android:name="edu.osu.currier.EditProfileActivity"
-            android:label="@string/title_activity_edit_profile" >
-        </activity>
-        <activity
-            android:name="edu.osu.currier.ProfileActivity"
-            android:label="@string/title_activity_profile"
-            android:windowSoftInputMode="stateHidden|adjustResize" >
-        </activity>
         
+         <!-- Entry for CartActivity.class -->
         <activity
             android:name="edu.osu.currier.CartActivity"
             android:label="@string/title_activity_cart" 
             >            
         </activity>
+      
+        <activity
+            android:name="edu.osu.currier.EditProfileActivity"
+            android:label="@string/title_activity_edit_profile" >
+        </activity>
+        
+        <activity
+            android:name="edu.osu.currier.ProfileActivity"
+            android:label="@string/title_activity_profile"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
+        </activity>
+          
+        <activity
+            android:name="edu.osu.currier.ListSellers"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="edu.osu.currier.RateReview"
+            android:label="@string/title_activity_rate_review"
+            android:parentActivityName="edu.osu.currier.ListSellers" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.osu.currier.ListSellers" />
+        </activity>
+        <activity
+            android:name="edu.osu.currier.ViewRatings"
+            android:label="@string/title_activity_view_ratings"
+            android:parentActivityName="edu.osu.currier.RateReview" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.osu.currier.RateReview" />
+        </activity>
+        
     </application>
 
 </manifest>

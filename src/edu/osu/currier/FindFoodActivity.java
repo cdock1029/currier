@@ -346,6 +346,9 @@ public class FindFoodActivity extends FragmentActivity implements
 		case R.id.menu_profile:
 			startActivity(new Intent(this, ProfileActivity.class));
 			return true;
+		case R.id.menu_rate:
+			startActivity(new Intent(this, ListSellers.class));
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
