@@ -2,6 +2,15 @@
 <resources>
 
     <string name="app_name">Currier</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_activity_rating">ActivityRating</string>
+    <string name="title_activity_rate_review">RateReview</string>
+    <string name="postButton">Post</string>
+    <string name="reviewHint">Let us know what you think about this seller (optional)</string>
+    <string name="sellerName">Seller Name</string>
+    <string name="sellerAddr">Seller Addr</string>
+    <string name="title_activity_view_ratings">ViewRatings</string>
+    
     <string name="menu_settings">Settings</string>
     <string name="menu_logout">Logout</string>
     <string name="menu_profile">Profile</string>
