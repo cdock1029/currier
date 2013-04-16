@@ -86,7 +86,14 @@ public class FindFoodActivity extends FragmentActivity implements
 	
 	private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-    final private List<String> sellerId = new ArrayList<String>();
+    //The List to contain names for sellers
+    final List<String> sellerName = new ArrayList<String>();
+    //The list to contain address for sellers
+    final List<String> sellerAddress = new ArrayList<String>();
+    //The list to contain the sellers
+    final List<Seller> sellers = new ArrayList<Seller>();
+    //The list to contain the sellers' ids
+    final List<String> sellerId = new ArrayList<String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -172,14 +179,6 @@ public class FindFoodActivity extends FragmentActivity implements
 		FragmentManager fragmentManager = getFragmentManager();
 	    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 	    
-	    //The List to contain names for sellers
-	    final List<String> sellerName = new ArrayList<String>();
-	    //The list to contain address for sellers
-	    final List<String> sellerAddress = new ArrayList<String>();
-	    //The list to contain the sellers
-	    final List<Seller> sellers = new ArrayList<Seller>();
-	    ArrayList<String> spinnerArray = new ArrayList<String>( Arrays.asList("5 Kilometers","10 Kilometers", "20 Kilometers", "50 Kilometers", "All Locations"));
-	    
 	    locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 500.0f, this);
 	    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -221,19 +220,7 @@ public class FindFoodActivity extends FragmentActivity implements
 			//The MapFragment component for the Map/List Screen
 			final MapFragment partialMapFragment = new MapFragment();
 			
-			//Settings for the ListFragment determined by the ArrayAdapter
-			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1,sellerName) {
-				@Override
-				public View getView(int position, View convertView, ViewGroup parent) {
-					TextView textView = (TextView) super.getView(position, convertView, parent);
-					textView.setTextColor(android.graphics.Color.BLACK);
-					textView.setPadding(10, 20, 0, 10);
-					textView.setTextSize(18);
-					textView.setTypeface(Typeface.SERIF);
-					//textView.setBackgroundDrawable(getResources().getDrawable(R.drawable.textlines));
-					return textView;
-				}
-			};
+			final ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), R.layout.listview_item_row, sellerName, this); 
 			
 			//Grab the sellers' names and addresses from Parse
 			final ParseQuery query = new ParseQuery("Seller");
@@ -250,23 +237,21 @@ public class FindFoodActivity extends FragmentActivity implements
 								double lat = address.get(0).getLatitude();
 								double lon = address.get(0).getLongitude();
 								s.setDistance(getDistance(latitude, longitude, lat, lon));
-								System.out.println(seller.getString("publicName") + getDistance(latitude, longitude, lat, lon));
 							} catch (IOException e1) {
 								e1.printStackTrace();
 							}
-							sellerAddress.add(seller.getString("Address"));
-							sellerName.add(seller.getString("publicName"));
-							sellerId.add(seller.getString("objectId"));
 							sellers.add(s);
 						}
 						//Sort the sellers by distance from the user
 						Collections.sort(sellers);
 						sellerAddress.clear();
 						sellerName.clear();
+						sellerId.clear();
 						//Populate the Name and Address lists by the sorted sellers
 						for(Seller s: sellers) {
 							sellerName.add(s.getName());
 							sellerAddress.add(s.getAddress());
+							sellerId.add(s.getId());
 						}
 						//Update the ListFragment's content
 						adapter.notifyDataSetChanged();
@@ -274,47 +259,11 @@ public class FindFoodActivity extends FragmentActivity implements
 			);
 			
 			//The listFragment to display on the 1/2 map, 1/2 list screen view
-			ListFragment listFragment = new ListFragment() {
-				
-				//On clicking an item in the ListFragment, moves map to item's address
-				@Override
-				public void onListItemClick(ListView l, View v, int position, long id) {
-					List<Address> address = null;
-					try {
-						address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(sellerAddress.get(position), 1);
-						double lat = address.get(0).getLatitude();
-						double lon = address.get(0).getLongitude();
-						map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}}
-			};
-			
+			ListFragment listFragment = new ListFragment();
 			
 			//Sets the font, text color, and list content for the ListFragment
 			listFragment.setListAdapter(adapter);
-			
-//			listFragment.getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//
-//				@Override
-//				public boolean onItemLongClick(AdapterView<?> av, View v,
-//						int pos, long id) {
-//					return onLongListItemClick(v,pos,id);
-//				}
-//				
-//				protected boolean onLongListItemClick(View v, int pos, long id) {
-//					Intent menu = new Intent(FindFoodActivity.this, SellerMenuActivity.class);
-//					menu.putExtra("objectId", sellerId.get(pos));
-//					startActivity(menu);
-//				    return true;
-//				}				
-//			});
-			
-			
-			//Spinner spinner = new Spinner(this);
-			//ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, spinnerArray);
-			//spinner.setAdapter(spinnerArrayAdapter);
-			
+
 			//Add fragments to the fragmentTransaction, update screen view
 			fragmentTransaction.add(R.id.mapComponent, partialMapFragment);
 			fragmentTransaction.addToBackStack(null);

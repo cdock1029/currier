@@ -172,7 +172,7 @@ public class SellerMenuActivity extends ExpandableListActivity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			sellerId = extras.getString("objectId");
-			//sellerName = extras.getString("sellerName");
+			sellerName = extras.getString("sellerName");
 		}
 		setTitle(sellerName);
 		setUpOrderButton();
