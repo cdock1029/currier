@@ -259,23 +259,7 @@ public class FindFoodActivity extends FragmentActivity implements
 			);
 			
 			//The listFragment to display on the 1/2 map, 1/2 list screen view
-			ListFragment listFragment = new ListFragment() {
-				/*
-				//On clicking an item in the ListFragment, moves map to item's address
-				@Override
-				public void onListItemClick(ListView l, View v, int position, long id) {
-					List<Address> address = null;
-					try {
-						address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(sellerAddress.get(position), 1);
-						double lat = address.get(0).getLatitude();
-						double lon = address.get(0).getLongitude();
-						map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}}
-					*/
-			};
-			
+			ListFragment listFragment = new ListFragment();
 			
 			//Sets the font, text color, and list content for the ListFragment
 			listFragment.setListAdapter(adapter);

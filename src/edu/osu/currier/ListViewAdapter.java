@@ -92,7 +92,9 @@ public class ListViewAdapter extends ArrayAdapter<String>{
 					int position = (Integer) v.getTag();
 					Intent menu = new Intent(context, SellerMenuActivity.class);
 					String objectId = f.sellerId.get(position);
+					String sellerName = f.sellerName.get(position);
 					menu.putExtra("objectId", objectId);
+					menu.putExtra("sellerName", sellerName);
 					menu.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					context.startActivity(menu);
 				}
