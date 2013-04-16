@@ -165,11 +165,10 @@ public class CartActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		switch(v.getId()) {
-		case (R.id.submit_order_button):
+		int id = v.getId();
+		if (id == (R.id.submit_order_button)) {
 			new RemoteDataTask().execute();
-			break;
-		case (R.id.cancel_order_button):
+		} else if (id == (R.id.cancel_order_button)) {
 			finish();
 		}
 		

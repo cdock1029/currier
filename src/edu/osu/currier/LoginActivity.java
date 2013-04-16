@@ -150,14 +150,12 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		switch(v.getId()) {
-		case R.id.link_to_register:
+		int id = v.getId();
+		if (id == R.id.link_to_register) {
 			startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
 			finish();
-			break;
-		case R.id.btnLogin:
+		} else if (id == R.id.btnLogin) {
 			attemptLogin();
-			break;
 		}
 	}
 }

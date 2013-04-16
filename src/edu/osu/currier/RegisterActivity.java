@@ -200,14 +200,12 @@ public class RegisterActivity extends Activity implements OnClickListener{
 
 	@Override
 	public void onClick(View v) {
-		switch(v.getId()) {
-		case R.id.link_to_login:
+		int id = v.getId();
+		if (id == R.id.link_to_login) {
 			startActivity(new Intent(getApplicationContext(), LoginActivity.class));
 			finish();
-			break;
-		case R.id.btnRegister:
+		} else if (id == R.id.btnRegister) {
 			this.createUser();
-			break;
 		}
 
 	}

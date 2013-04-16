@@ -124,14 +124,12 @@ public class ProfileActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		switch(v.getId()) {
-		case R.id.btnEdit:
+		int id = v.getId();
+		if (id == R.id.btnEdit) {
 			Intent i = new Intent(ProfileActivity.this, EditProfileActivity.class);
 			startActivityForResult(i, EDIT_PROFILE);
-			break;
-		case R.id.btnBack:
+		} else if (id == R.id.btnBack) {
 			finish();
-			break;
 		}
 	}
 

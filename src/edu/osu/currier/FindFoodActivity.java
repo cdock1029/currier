@@ -332,24 +332,23 @@ public class FindFoodActivity extends FragmentActivity implements
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		//Handle selected option item
-		switch (item.getItemId()) {
-		case R.id.menu_logout:
+		int itemId = item.getItemId();
+		if (itemId == R.id.menu_logout) {
 			logout();
 			return true;
-		case R.id.menu_items:
+		} else if (itemId == R.id.menu_items) {
 			startActivity(new Intent(getApplicationContext(), SellerMenuActivity.class));
 			return true;
-		case R.id.menu_search:
+		} else if (itemId == R.id.menu_search) {
 			System.out.println("Yup");
 			return true;
-		case R.id.menu_profile:
+		} else if (itemId == R.id.menu_profile) {
 			startActivity(new Intent(this, ProfileActivity.class));
 			return true;
-		case R.id.menu_rate:
+		} else if (itemId == R.id.menu_rate) {
 			startActivity(new Intent(this, ListSellers.class));
 			return true;
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
 		

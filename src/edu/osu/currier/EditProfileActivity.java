@@ -167,17 +167,15 @@ public class EditProfileActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		switch(v.getId()) {
-		case R.id.btnSave:
+		int id = v.getId();
+		if (id == R.id.btnSave) {
 			this.updateProfile();
-			break;
-		case R.id.btnDiscard:
+		} else if (id == R.id.btnDiscard) {
 			Intent profile = new Intent();
 			//profile.addFlags(flags)
 			setResult(Activity.RESULT_CANCELED, profile);
 			//startActivity(profile);
 			finish();
-			break;
 		}
 	}
 }
