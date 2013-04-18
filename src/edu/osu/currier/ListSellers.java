@@ -8,114 +8,94 @@ import com.parse.*;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.RatingBar.OnRatingBarChangeListener;
-import android.widget.ScrollView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
+/* This activity lists all the sellers and their ratings.
+ * It then waits for the user to click on the ratings of a seller.
+ * This then initiates a new activity where the user can actually provide his review. 
+ */
 public class ListSellers extends Activity {
 
 	private static final String TAG = "ListSellers";
-	protected static final String EXTRA_SELLER_NAME = "SELLER_NAME";
-	protected static final String EXTRA_RATING = "SELLER_RATING";
-	public static ParseUser mUserId = null;
+
 	public static ParseObject mSeller = null;
 
-	TableRow[] tr;
-	TextView[] names;
-	RatingBar[] ratings;
-
-	float[] mRating;
+	public static ParseObject[] mSellerList; // the list of all the sellers
+	RatingBar[] rbSellers; // for their ratings
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list_sellers);
 
-		mUserId = ParseUser.getCurrentUser();
-
-		getSellersData();
-
-		addListenerOnButton();
-
+		showSellersData();
 	}
 
-	private void addListenerOnButton() {
+	private void showSellersData() {
 
-	}
-
-	private void getSellersData() {
-		// final LinearLayout listSellersLayout = (LinearLayout)
-		// findViewById(R.id.list_sellers);
-		Log.d(TAG, "Attempting to create the seller table now...");
-
-		final TableLayout sellerTable = (TableLayout) findViewById(R.id.sellerTable);
+		// fetch the TableLayout from the layout
+		final LinearLayout lloSellers = (LinearLayout) findViewById(R.id.lloSellers);
 
 		ParseQuery query = new ParseQuery("Seller");
+
 		query.findInBackground(new FindCallback() {
 			public void done(List<ParseObject> sellers, ParseException e) {
 				if (e == null) {
 					try {
 
-						tr = new TableRow[sellers.size()];
-						names = new TextView[sellers.size()];
-						ratings = new RatingBar[sellers.size()];
-						mRating = new float[sellers.size()];
+						int numSellers = sellers.size();
+						rbSellers = new RatingBar[numSellers];
+						mSellerList = new ParseObject[numSellers];
 
-						TextView hello = (TextView) findViewById(R.id.hello);
-						for (int i = 0; i < sellers.size(); i++) {
-
-							tr[i] = new TableRow(getApplicationContext());
-							names[i] = new TextView(getApplicationContext());
-							ratings[i] = new RatingBar(getApplicationContext());
-						}
-
-						Log.d(TAG, "Size = " + sellers.size());
-
+						// iterate over each seller
 						Iterator<ParseObject> it = sellers.iterator();
 						int i = 0;
 						while (it.hasNext()) {
-							// 1) For each seller
+							// 1) For each seller, Make a note in the global
+							// array
 							ParseObject s = it.next();
-							// mSellerId = s.getObjectId();
+							mSellerList[i] = s;
 
 							// 2) Set a TextView to its publicName
 							String publicName = (String) s.get("publicName");
-							names[i].setText(publicName);
-							Log.d(TAG, "name view created -- " + publicName);
+							TextView txtSellerName = new TextView(
+									getApplicationContext());
+							txtSellerName.setText(publicName);
+							txtSellerName.setTextColor(Color
+									.parseColor("#000000"));
+							txtSellerName.setTextSize(
+									TypedValue.COMPLEX_UNIT_SP, 18);
 
 							// 3) Set a RatingBar to its rating
-							mRating[i] = (float) s.getDouble("avgRating");
-							float r = mRating[i];
-							Log.d(TAG, "Rating " + r + " recd.");
-
-							ratings[i].setRating(r);
-							// ratings[i].setIsIndicator(true);
+							float r = (float) s.getDouble("avgRating");
+							rbSellers[i] = new RatingBar(
+									getApplicationContext());
+							rbSellers[i].setRating(r);
+							rbSellers[i].setNumStars(5);
+							LayoutParams lp = new LayoutParams(
+									LayoutParams.WRAP_CONTENT,
+									LayoutParams.WRAP_CONTENT);
+							rbSellers[i].setLayoutParams(lp);
+							addListenerOnRatingBar(i, rbSellers[i]);
 							Log.d(TAG, "Rating " + r + " set");
 
 							// 4) Add the name and rating to the table row
-							tr[i].addView(names[i]);
-							tr[i].addView(ratings[i]);
+							// tr[i] = new TableRow(getApplicationContext());
+							// tr[i].addView(txtNames[i]);
+							// tr[i].addView(rbSellers[i]);
 
-							addListenerOnRatingBar(i, ratings[i]);
-
-							// 4) Add this nameView on sellerLayouts[i]
-							// sellerLayouts[i].addView(publicNameView);
-							Log.d(TAG, "name & rating added to tr[" + i + "]");
-
-							// n) Add this tr[i] to the listSellersLayout
-							sellerTable.addView(tr[i]);
-							Log.d(TAG, "tr[" + i + "]"
-									+ " added to sellerTable");
+							// 5) Add this table row to the table layout
+							lloSellers.addView(txtSellerName);
+							lloSellers.addView(rbSellers[i]);
+							Log.d(TAG, "tr[" + i + "]" + " added to lloSellers");
 
 							i++;
 						}
@@ -134,52 +114,27 @@ public class ListSellers extends Activity {
 		ratingBar.setOnRatingBarChangeListener(new OnRatingBarChangeListener() {
 			public void onRatingChanged(RatingBar ratingBar, float rating,
 					boolean fromUser) {
+				try {
+					Intent rateReview = new Intent(getApplicationContext(),
+							RateReview.class);
+					// note which seller is clicked, this will be useful in the
+					// next activity
+					mSeller = mSellerList[i];
 
-				// ParseQuery q = new ParseQuery("Seller");
-				// q.whereEqualTo("publicName", names[i].getText().toString());
-				// q.findInBackground(new FindCallback() {
-				//
-				// public void done(List<ParseObject> list, ParseException e) {
-				// try {
-				// if (e == null) {
-				// if (list.size() == 1) {
-				// mSeller = list.get(0);
-				// Log.d(TAG,
-				// "Seller: Retrieved "
-				// + mSeller.get("publicName"));
-				// } else {
-				// Log.d(TAG, "more than 1 match");
-				// }
-				// } else {
-				// Log.d(TAG, "Error: " + e.getMessage());
-				// }
-				//
-				// } catch (Exception e1) {
-				// Log.d(TAG, e1.getMessage());
-				// }
-				// }
-				// });
-				//
-				// if (mSeller == null) {
-				// Log.d(TAG, "mSeller = null when not expected");
-				// } else {
-				// Toast.makeText(
-				// ListSellers.this,
-				// "This should now take us to RateReview Activity "
-				// + String.valueOf(ratingBar.getRating()),
-				// Toast.LENGTH_LONG).show();
+					// delete all the arrays that are of no use anymore
+					mSellerList = null;
+					rbSellers = null;
+					System.gc();
 
-				Intent intent = new Intent(ListSellers.this, RateReview.class);
-				String sellerName = names[i].getText().toString();
-				intent.putExtra(EXTRA_SELLER_NAME, sellerName);
-				intent.putExtra(EXTRA_RATING, mRating[i]);
-				startActivity(intent);
-				// }
-				// }
+					// start the new activity
+					startActivity(rateReview);
+
+				} catch (Exception e) {
+					Log.d(TAG, e.getMessage());
+				}
 			}
 		});
 	}
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

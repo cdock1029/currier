@@ -1,6 +1,6 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/list_sellers"
+    android:id="@+id/sellerScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,22 +10,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ListSellers" >
 
-    <TextView
-        android:id="@+id/hello"
+    <LinearLayout
+        android:id="@+id/lloSellers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:orientation="vertical" >
 
-    <ScrollView
-        android:id="@+id/sellerScrollView"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent" >
+        <TextView
+            android:id="@+id/txtListSellerBanner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/txtListSellerBanner"
+            android:textColor="#000000"
+            android:textSize="10pt" />
+    </LinearLayout>
 
-        <TableLayout
-            android:id="@+id/sellerTable"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-        </TableLayout>
-    </ScrollView>
-
-</LinearLayout>
+</ScrollView>

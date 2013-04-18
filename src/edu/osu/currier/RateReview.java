@@ -15,6 +15,7 @@ import com.parse.SaveCallback;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,14 +23,13 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.RatingBar;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
-import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 
 public class RateReview extends Activity implements OnClickListener {
@@ -37,20 +37,16 @@ public class RateReview extends Activity implements OnClickListener {
 
 	TextView txtName;
 	TextView txtAddr;
-	RatingBar rbarSeller;
+	RatingBar rbSeller;
 	EditText editReview;
 	Button btnPost;
 
 	float mRating;
 	String mReview;
 
-	private String sellerName;
+	private LinearLayout lloReviews;
 
-	private String sellerAddr;
-
-	private TableLayout tblReviews;
-
-	protected String recordId;
+	protected TextView uname;
 
 	protected static ParseUser user = null;
 	protected static ParseObject seller = null;
@@ -63,47 +59,20 @@ public class RateReview extends Activity implements OnClickListener {
 			// Show the Up button in the action bar.
 			setupActionBar();
 
-			// Parse.initialize(this,
-			// "mGgQCNePMku0rAuWaV8vIpJJ2Qd4PrzmzTnxzdB8",
-			// "WmYOeKOFUh7v3UVk6SKICi7md3Wx0FfFsU69NgMa");
+			Parse.initialize(this, "mGgQCNePMku0rAuWaV8vIpJJ2Qd4PrzmzTnxzdB8",
+					"WmYOeKOFUh7v3UVk6SKICi7md3Wx0FfFsU69NgMa");
 
-			Intent intent = getIntent();
+			getIntent();
 
-			setUser();
 			user = ParseUser.getCurrentUser();
 			Log.d(TAG, "user = " + user.getUsername());
-			// Toast.makeText(RateReview.this, "user = " + user.getUsername(),
-			// Toast.LENGTH_LONG).show();
 
-			ParseQuery query = new ParseQuery("Seller");
-			sellerName = intent.getStringExtra(ListSellers.EXTRA_SELLER_NAME);
-			mRating = intent.getFloatExtra(ListSellers.EXTRA_RATING, -1);
-			// Log.d(TAG, "mRating = " + mRating);
-
-			Log.d(TAG,
-					"SELLER_NAME = "
-							+ intent.getStringExtra(ListSellers.EXTRA_SELLER_NAME));
-			// hard coded seller for now
-			// String sellerId = "Ja9S22poQM";
-
-			// seller = query.get(sellerId);
-
-			query.whereEqualTo("publicName", sellerName);
-			try {
-				seller = query.getFirst();
-			} catch (Exception e) {
-				Log.d(TAG, e.getMessage());
-			}
-			// sellerName = seller.getString("publicName");
-			sellerAddr = seller.getString("Address");
+			seller = ListSellers.mSeller;
+			String sellerName = seller.getString("publicName");
+			String sellerAddr = seller.getString("Address");
 			mRating = (float) seller.getDouble("avgRating");
-			Log.d(TAG, "mRating = " + mRating);
-
-			// Log.d(TAG, "onCreate(): seller = " + sellerName);
-			Toast.makeText(
-					RateReview.this,
-					"onCreate(): seller = " + sellerName + ".. Rating is: "
-							+ mRating, Toast.LENGTH_LONG).show();
+			Log.d(TAG, "Fetched seller: " + sellerName + ", " + sellerAddr
+					+ ", " + mRating);
 
 			setAllFields();
 
@@ -114,26 +83,17 @@ public class RateReview extends Activity implements OnClickListener {
 		}
 	}
 
-	private void setUser() {
-		// hard coded user for now
-		try {
-			user = ParseUser.logIn("newuser@gmail.com", "abc");
-			Log.d(TAG, "getUser: user = " + user.getUsername());
-		} catch (ParseException e) {
-			Log.d(TAG, e.getMessage());
-		}
-	}
-
 	private void setAllFields() {
-		txtName = (TextView) findViewById(R.id.sellerName);
-		txtAddr = (TextView) findViewById(R.id.sellerAddr);
-		rbarSeller = (RatingBar) findViewById(R.id.rating);
-		editReview = (EditText) findViewById(R.id.review);
-		btnPost = (Button) findViewById(R.id.postButton);
-		tblReviews = (TableLayout) findViewById(R.id.reviewsTable);
+		txtName = (TextView) findViewById(R.id.txtSellerName);
+		txtAddr = (TextView) findViewById(R.id.txtSellerAddr);
+		rbSeller = (RatingBar) findViewById(R.id.rbSeller);
+		rbSeller.setNumStars(5);
+		editReview = (EditText) findViewById(R.id.editReview);
+		btnPost = (Button) findViewById(R.id.btnPost);
+		lloReviews = (LinearLayout) findViewById(R.id.sellerInfoLayout);
 
-		txtName.setText(sellerName);
-		txtAddr.setText(sellerAddr);
+		txtName.setText(seller.getString("publicName"));
+		txtAddr.setText(seller.getString("Address"));
 
 		fetchDisplayAllRatings();
 
@@ -173,21 +133,18 @@ public class RateReview extends Activity implements OnClickListener {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void postRating(View view) {
-
-	}
-
 	@Override
 	public void onClick(View v) {
 		final String description = editReview.getText().toString();
-		final float r = rbarSeller.getRating();
-
-		// ParseObject db = new ParseObject("SellerRating");
+		final float r = rbSeller.getRating();
 
 		// see if an object with same seller-user exists
 		ParseQuery q = new ParseQuery("SellerRating");
 		q.whereEqualTo("seller", seller);
 		q.whereEqualTo("user", user);
+
+		// 1-a) Fetch the row from the SellerRating table which matches that
+		// particular seller and the current user
 		q.getFirstInBackground(new GetCallback() {
 
 			@Override
@@ -195,11 +152,14 @@ public class RateReview extends Activity implements OnClickListener {
 				if (e == null) {
 
 				} else {
+					// 1-b) If there is no such row, create a row with this
+					// seller-user pair
 					ob = new ParseObject("SellerRating");
 					ob.put("seller", seller);
 					ob.put("user", user);
 					Log.d(TAG, e.getMessage());
 				}
+				// 2) Update the description and rating for this row
 				ob.put("description", description);
 				ob.put("rating", r);
 				ob.saveInBackground(new SaveCallback() {
@@ -207,13 +167,11 @@ public class RateReview extends Activity implements OnClickListener {
 						try {
 
 							// ob.saveInBackground();
-							Log.d(TAG + " onClick(): ", "Saved: " + description
-									+ ", " + r + ", " + sellerName + ", "
-									+ user.getString("username"));
-
-							Toast.makeText(RateReview.this,
-									"Thank you for rating " + sellerName,
-									Toast.LENGTH_LONG).show();
+							Log.d(TAG, "Saved: " + description + ", " + r
+									+ ", " + seller.getString("publicName")
+									+ ", " + user.getString("username"));
+							// 3) call the function that displays the updated
+							// ratings
 							updateRatings();
 						} catch (Exception e2) {
 							Log.d(TAG, e2.getMessage());
@@ -231,34 +189,48 @@ public class RateReview extends Activity implements OnClickListener {
 		// new avg
 		ParseQuery q = new ParseQuery("SellerRating");
 		q.whereEqualTo("seller", seller);
+
+		// 1) Compute the new average rating
+		// 1-a) Fetch the rows of this seller from SellerRating
 		q.findInBackground(new FindCallback() {
 
 			@Override
 			public void done(List<ParseObject> list, ParseException e) {
+
+				// 1-b) iterate over each rating of this seller
 				Iterator<ParseObject> it = list.iterator();
 				double sum = 0;
 				while (it.hasNext()) {
 					ParseObject ob = it.next();
 					sum += ob.getDouble("rating");
 				}
+				// 1-c) compute the average
 				final double avg = sum / (double) list.size();
 
-				// update seller record with the new average
+				// 2) update seller record with the new average
 				seller.put("avgRating", avg);
 				seller.saveInBackground();
+
+				// 3) Display a thank-you message which signals successful
+				// completion of RateReview activity
+				Toast.makeText(
+						RateReview.this,
+						"Thank you, " + user.getUsername()
+								+ " for providing the review.",
+						Toast.LENGTH_LONG).show();
 			}
 		});
 
-		// remove the editable fields to display new ratings
-		LinearLayout layout = (LinearLayout) findViewById(R.id.sellerInfoLayout);
-		layout.removeView(editReview);
-		layout.removeView(rbarSeller);
-		layout.removeView(btnPost);
+		// 4) need to redraw everything
+		lloReviews.removeAllViews();
 
-		tblReviews.removeAllViews();
+		// 5) Draw the seller's name-address again
+		lloReviews.addView(txtName);
+		lloReviews.addView(txtAddr);
+
+		// 6) Fetch the new reviews and display them
 		fetchDisplayAllRatings();
 
-		// layout.refreshDrawableState();
 	}
 
 	public void fetchDisplayAllRatings() {
@@ -266,99 +238,90 @@ public class RateReview extends Activity implements OnClickListener {
 		ParseQuery sr = new ParseQuery("SellerRating");
 		sr.whereEqualTo("seller", seller);
 
+		// 1) Fetch all the rows that match this seller
 		sr.findInBackground(new FindCallback() {
 
 			@Override
 			public void done(List<ParseObject> reviews, ParseException e) {
 
-				Log.d(TAG, "reviews found");
-
-				// create as many rows as #ratings
-				TableRow[] tr = new TableRow[reviews.size() * 3];
-				String[] userNames = new String[reviews.size()];
-				String[] descriptions = new String[reviews.size()];
-				Double[] ratingPts = new Double[reviews.size()];
-
-				TextView tv = new TextView(getApplicationContext());
-				tv.setText("Average Rating (out of " + reviews.size()
+				// 2) Display the average rating
+				TextView txtAvg = new TextView(getApplicationContext());
+				txtAvg.setText("Average Rating (out of " + reviews.size()
 						+ " ratings):");
-				RatingBar rb = new RatingBar(getApplicationContext());
-				mRating = (float) seller.getDouble("avgRating");
-				rb.setRating(mRating);
-				rb.setIsIndicator(true);
+				txtAvg.setTextColor(Color.parseColor("#000000"));
+				txtAvg.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
-				TableRow trow0 = new TableRow(getApplicationContext());
-				trow0.addView(tv);
-				tblReviews.addView(trow0);
+				lloReviews.addView(txtAvg);
 
-				TableRow trow1 = new TableRow(getApplicationContext());
-				trow1.addView(rb);
-				tblReviews.addView(trow1);
+				// Must set the RatingBar's width to WRAP_CONTENT to ensure the
+				// number of stars is 5
+				RatingBar rbAvg = new RatingBar(getApplicationContext());
+				LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+						LayoutParams.WRAP_CONTENT);
+				((View) rbAvg).setLayoutParams(lp);
 
-				// iterate over each review
+				float avgRating = (float) seller.getDouble("avgRating");
+				rbAvg.setRating(avgRating);
+				rbAvg.setIsIndicator(true);
+				rbAvg.setNumStars(5);
+				lloReviews.addView(rbAvg);
+
+				// 3) Display each review
+				// 3-a) iterate over each review
 				Iterator<ParseObject> it = reviews.iterator();
-				int i = 0;
 				while (it.hasNext()) {
-					ParseObject r = it.next();
+					final ParseObject r = it.next();
 
-					descriptions[i] = r.getString("description");
-					Log.d(TAG, "desc = " + descriptions[i]);
-
-					ratingPts[i] = r.getDouble("rating");
-					Log.d(TAG, "rating = " + ratingPts[i].toString());
-
-					// fetch the user
-					// userNames[i] = u.getUsername();
+					ParseQuery q = ParseUser.getQuery();
 					ParseObject ob = r.getParseObject("user");
-					Log.d(TAG, "user = " + ob.getObjectId());
+					q.getInBackground(ob.getObjectId(), new GetCallback() {
 
-					ParseQuery userq = ParseUser.getQuery();
-					ParseUser u;
-					try {
-						u = (ParseUser) userq.get(ob.getObjectId());
-						Log.d(TAG, "Fetched " + u.getObjectId());
-						userNames[i] = u.getString("username");
-						Log.d(TAG, "uname = " + userNames[i]);
-					} catch (ParseException e1) {
-						Log.d(TAG, e1.getMessage());
-					}
+						@Override
+						public void done(ParseObject u, ParseException e1) {
 
-					Log.d(TAG, "Fetching: " + userNames[i] + " "
-							+ descriptions[i] + " " + ratingPts[i]);
+							// 3-b) Display the user's name who wrote this
+							// review
+							String tempUname = u.getString("username");
+							Log.d(TAG, "Fetched " + tempUname);
 
-					// Create objects for showing this info
-					TextView uname = new TextView(getApplicationContext());
-					uname.setText(userNames[i]);
+							TextView txtUname = new TextView(
+									getApplicationContext());
+							txtUname.setText("Review By: " + tempUname);
+							txtUname.setTextColor(Color.parseColor("#000000"));
+							txtUname.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
 
-					tr[i] = new TableRow(getApplicationContext());
-					tr[i + 1] = new TableRow(getApplicationContext());
-					tr[i + 2] = new TableRow(getApplicationContext());
+							lloReviews.addView(txtUname);
 
-					rb = new RatingBar(getApplicationContext());
-					rb.setRating(ratingPts[i].floatValue());
-					rb.setIsIndicator(true);
-					Log.d(TAG,
-							"new RatingBar created: "
-									+ ratingPts[i].floatValue());
+							// 3-c) Display the verbal review
+							String desc = r.getString("description");
+							TextView txtDesc = new TextView(
+									getApplicationContext());
+							txtDesc.setText(desc);
+							txtDesc.setTextColor(Color.parseColor("#000000"));
+							txtDesc.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
-					tr[i].addView(uname);
-					tr[i + 1].addView(rb);
-					Log.d(TAG, "rb view added");
+							lloReviews.addView(txtDesc);
 
-					TextView desc = new TextView(getApplicationContext());
-					desc.setText(descriptions[i]);
-					Log.d(TAG, "new TextView created: " + descriptions[i]);
+							// 3-d) Display the star-rating
+							// (the step is 0.5, so may not see the accurate
+							// rating)
+							float ratingVal = (float) r.getDouble("rating");
+							RatingBar rbRating = new RatingBar(
+									getApplicationContext());
+							rbRating.setNumStars(5);
+							rbRating.setRating(ratingVal);
+							rbRating.setIsIndicator(true);
+							LayoutParams lp = new LayoutParams(
+									LayoutParams.WRAP_CONTENT,
+									LayoutParams.WRAP_CONTENT);
+							rbRating.setLayoutParams(lp);
 
-					tr[i + 2].addView(desc);
-					Log.d(TAG, "desc view added");
+							lloReviews.addView(rbRating);
+						}
+					});
 
-					tblReviews.addView(tr[i]);
-					tblReviews.addView(tr[i + 1]);
-					tblReviews.addView(tr[i + 2]);
-					Log.d(TAG, "all items added to tblReviews");
-
-					i++;
 				}
+
 			}
 
 		}); // end sr.findInBackground

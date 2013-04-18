@@ -16,7 +16,7 @@
     <string name="menu_profile">Profile</string>
     <string name="menu_search">Search for Food</string>
     <string name="menu_items">Food Menu</string>
-    <string name="hello_world">Your nearby sellers:</string>
+    <string name="txtListSellerBanner">Your nearby sellers:</string>
     <string name="title_section1">Split View</string>
     <string name="title_section2">Map View</string>
     <string name="title_section3">Nothing Here Yet</string>
@@ -49,7 +49,7 @@
 	<string name="total_label_text">Total Price:</string>
     <string name="cancel_order">Cancel</string>
 	<string name="order_complete">Order Complete.\nEnjoy Your Food!</string>
-    
+	
 	<color name="menu_background_unselected">#66ABBDCD</color>
 	<color name="menu_background_selected">#EE117FAB</color>
 	<color name="button_background">#44EB8540</color>
