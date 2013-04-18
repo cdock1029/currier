@@ -1,12 +1,15 @@
+/**
+ * Handles Logging the user in. Saves Logged in user for use throughout application.
+ * Links to Register activity for new users. Connects to Parse online database.
+ * User is cached to elminate need to sign in for subsequent uses of the app.
+ */
 package edu.osu.currier;
-
-
 import com.parse.LogInCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseUser;
-
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,10 +19,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LoginActivity extends Activity implements OnClickListener {
 	private static final String ACT = "LoginActivity";
-	
+	Dialog progressDialog;
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
@@ -51,6 +55,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 		Log.d(ACT, "finishing onCreate...");
 	}
 
+	/**
+	 * Function that is called when login button is pressed.
+	 * Error-checks fields for corret format and all filled in.
+	 * Alerts user if errors found. Sends data to Parse. Creates intent for FindFoodActivity.
+	 */
 	private void attemptLogin() {
 		// Reset errors.
 		this.mEmailEditableField.setError(null);
@@ -93,6 +102,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 				@Override
 				public void done(ParseUser user, ParseException e) {
+					progressDialog.dismiss();
 					if (user != null) {
 						//Worked
 						Log.d(ACT, "User: " + mEmail + " has logged in.");
@@ -107,15 +117,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 					} else {
 						//log in failed.
 						Log.d(ACT, "Error: user " + mEmail + " failed login.");
+						Toast.makeText(getApplicationContext(), "Error: Login failed. Please check your credentials.", Toast.LENGTH_LONG).show();
 					}
-					
 				}
-				
 			});
 		}
-
-
-
 	}
 
 	@Override
@@ -155,6 +161,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 			startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
 			finish();
 		} else if (id == R.id.btnLogin) {
+			progressDialog = ProgressDialog.show(LoginActivity.this, "",
+					"Loading...", true);
 			attemptLogin();
 		}
 	}

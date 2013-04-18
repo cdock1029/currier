@@ -1,11 +1,12 @@
+/**
+ * Registers new users. Validates fields for correct data and that they are filled in.
+ * Once user is created, the user is logged in.
+ */
 package edu.osu.currier;
 
-
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

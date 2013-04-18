@@ -1,3 +1,6 @@
+/**
+ * Shopping Cart for confirming or rejecting an order. Displays a list of items selected and individual and total prices.
+ */
 package edu.osu.currier;
 
 import java.util.ArrayList;
@@ -52,6 +55,11 @@ public class CartActivity extends Activity implements OnClickListener {
 	static final String[] CART_COLS = {"NAME", "PRICE"};
 	List<Map<String,String>> data;
 
+	/**
+	 * Remote Thread for sending order to Parse.com
+	 * @author conordockry
+	 *
+	 */
 	private class RemoteDataTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
@@ -63,18 +71,30 @@ public class CartActivity extends Activity implements OnClickListener {
 
 		@Override
 		protected Void doInBackground(Void... arg0) {
+			//Create a new Order object.
 			order = new ParseObject("Order");
+			//The order object (and database table) has a field for which user made the order
 			order.put("userId", ParseObject.createWithoutData("_User", user.getObjectId()));
+			//..and a field for who the user purchased food from..
 			order.put("sellerId", ParseObject.createWithoutData("Seller", sellerId));
+			//total price of order.
 			order.put("total", total);
+			//Using 3rd part money library because adding and subracting money values has hazards.. not sure if this is perfect solution..
 			Money money = Money.parse(HelperFunctions.country.Locality + total);
+			
+			//Relation can create 1 to many relationship on db. Each order has many menuItems..
 			ParseRelation relation = order.getRelation("menuItems");
 			for (String id : ids) {
+				//adding each menu item to order. Creating without data is Parse's way of referencing an object on the db that we haven't requested..but it will know which
+				//one by its ID once we push this to server..
 				relation.add(ParseObject.createWithoutData("MenuItems", id));
 			}
 			try {
+				//send to db
 				order.save();
+				//update balance of User with the total money ammount of this order.
 				user.increment("balance", money.getAmount());
+				//if connection can't be made right now..don't crash, just do it later..
 				user.saveEventually();
 			} catch (ParseException e) {
 				Log.d(TAG, "Parse: " + e.getMessage());
@@ -84,12 +104,11 @@ public class CartActivity extends Activity implements OnClickListener {
 
 		@Override
 		protected void onPostExecute(Void result) {
+			//Throw up an alert that the transaction was successful!
 			CartActivity.this.progressDialog.dismiss();
 			AlertDialog dialog = builder.create();
 			dialog.show();
 		}
-
-
 	}
 
 
@@ -97,6 +116,7 @@ public class CartActivity extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		user = ParseUser.getCurrentUser();
+		//if not logged in, go to login screen
 		if (user == null) {
 			Intent login = new Intent(getApplicationContext(), LoginActivity.class);
 			login.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -107,8 +127,8 @@ public class CartActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_cart);
 		
 		cartLv = (ListView)findViewById(R.id.cart_list);
-		//totalLv = (ListView)findViewById(R.id.total_list);
 		Bundle extras = getIntent().getExtras();
+		//Get the data passed in from SellerMenuActivity
 		if (extras != null) {
 			names = extras.getStringArrayList("names");
 			prices = extras.getStringArrayList("prices");
@@ -116,7 +136,7 @@ public class CartActivity extends Activity implements OnClickListener {
 			total = extras.getString("total");
 			sellerId = extras.getString("sellerId");
 		}
-		populateDetails();
+		populateDetails(); //give the listview data
 		setUpButton();
 	}
 
@@ -170,9 +190,6 @@ public class CartActivity extends Activity implements OnClickListener {
 			new RemoteDataTask().execute();
 		} else if (id == (R.id.cancel_order_button)) {
 			finish();
-		}
-		
+		}	
 	}
-
-
 }

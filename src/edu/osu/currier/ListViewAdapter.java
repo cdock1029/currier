@@ -56,7 +56,7 @@ public class ListViewAdapter extends ArrayAdapter<String>{
 			holder = new ListViewItemHolder();
 			holder.text = (TextView) row.findViewById(R.id.listText);
 			holder.text.setTextColor(android.graphics.Color.BLACK);
-			holder.text.setTypeface(Typeface.SERIF);
+			//holder.text.setTypeface(Typeface.SERIF);
 			holder.text.setTextSize(20);
 			
 			holder.mapButton = (Button) row.findViewById(R.id.mapButton);

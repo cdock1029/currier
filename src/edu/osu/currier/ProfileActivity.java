@@ -2,16 +2,17 @@ package edu.osu.currier;
 
 import java.text.NumberFormat;
 
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
+import com.parse.RefreshCallback;
 
 import edu.osu.currier.library.HelperFunctions;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -19,7 +20,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 public class ProfileActivity extends Activity implements OnClickListener {
 	private static final String ACT = "ProfileActivity";
@@ -31,7 +31,7 @@ public class ProfileActivity extends Activity implements OnClickListener {
 
 	//Parse User.
 	private static ParseUser mUser;
-	private static GetCallback callback;
+	private static RefreshCallback callback;
 	private static Bundle bundle = null;
 
 	//UI references.
@@ -71,18 +71,24 @@ public class ProfileActivity extends Activity implements OnClickListener {
 		btnDiscard.setOnClickListener(ProfileActivity.this);
 
 		mUser = ParseUser.getCurrentUser();
-		callback = new GetCallback() {
+		callback = new RefreshCallback() {
 			@Override
 			public void done(ParseObject object, ParseException e) {
 				if (object != null) {
 					mUser = (ParseUser) object;
 				}
+				//This needs to be called in here...because we don't want it to run until
+				//User object has been updated to freshest data.
 				ProfileActivity.populateViews();
+				progressDialog.dismiss();
 			}
 		};
 
-		if (mUser != null) {
-			mUser.fetchInBackground(callback);
+		if (mUser != null) { //Since this Activity shows current balance, we always want to refresh user..even though
+			//user is cached across activities...
+			progressDialog = ProgressDialog.show(ProfileActivity.this, "",
+					"Loading...", true);
+			mUser.refreshInBackground(callback);
 		} else {
 			// show the signup or login screen
 			Intent login = new Intent(ProfileActivity.this, LoginActivity.class);
@@ -96,7 +102,6 @@ public class ProfileActivity extends Activity implements OnClickListener {
 	}
 
 	protected static void populateViews() {
-		// TODO Auto-generated method stub
 		// Populate fields with data from database
 
 		mBalanceEditableField.setText(nf.format(mUser.getNumber("balance")));
@@ -142,12 +147,10 @@ public class ProfileActivity extends Activity implements OnClickListener {
 			}
 			switch (resultCode) {
 			case RESULT_OK:
-				//Toast.makeText(getApplicationContext(), "EDIT_PROFILE: success", Toast.LENGTH_SHORT).show();
 				bundle = intent.getExtras();
 				populateViews();
 				break;
 			case RESULT_CANCELED:
-				//Toast.makeText(getApplicationContext(), "CANCEL_EDIT: nope", Toast.LENGTH_LONG).show();
 				break;
 			}
 		}
