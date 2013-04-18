@@ -14,6 +14,7 @@ import com.parse.SaveCallback;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -61,8 +62,6 @@ public class RateReview extends Activity implements OnClickListener {
 
 			Parse.initialize(this, "mGgQCNePMku0rAuWaV8vIpJJ2Qd4PrzmzTnxzdB8",
 					"WmYOeKOFUh7v3UVk6SKICi7md3Wx0FfFsU69NgMa");
-
-			getIntent();
 
 			user = ParseUser.getCurrentUser();
 			Log.d(TAG, "user = " + user.getUsername());
@@ -181,6 +180,21 @@ public class RateReview extends Activity implements OnClickListener {
 			}
 
 		});
+
+		// Create and show a progress while the review is being submitted
+		final ProgressDialog pdReview = ProgressDialog.show(RateReview.this,
+				"Please wait", "Submitting your review..", true);
+		pdReview.setCancelable(true);
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+				}
+				pdReview.dismiss();
+			}
+		}).start();
 
 	}
 

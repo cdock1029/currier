@@ -68,45 +68,46 @@ public class SellerMenuActivity extends ExpandableListActivity {
 	private String sellerName = "Best in Town";
 	//format currenty correctly
 	static NumberFormat nf = NumberFormat.getCurrencyInstance(HelperFunctions.country.LOC);
+	List<Map<String,String>> groupDataX;
+	List<List<Map<String,String>>> childDataX;
 	
 	private class RemoteDataTask extends AsyncTask<Void,Void,Void> {
 
 		@Override
 		protected Void doInBackground(Void... arg0) {
+			
 			ParseQuery innerInnerSellerQuery = new ParseQuery("Seller");
-			//innerInnerSellerQuery.whereEqualTo("objectId", "9ML249tNNY");
-			//innerInnerSellerQuery.whereEqualTo("objectId", "3djgQh1VTZ");
-			innerInnerSellerQuery.whereEqualTo("objectId", sellerId);
-
-			ParseQuery innerMenuQuery = new ParseQuery("Menu");
-			innerMenuQuery.whereMatchesQuery("seller", innerInnerSellerQuery);
-
-			ParseQuery query = new ParseQuery("MenuItems");
-			query.whereMatchesQuery("menu", innerMenuQuery);
-			query.include("menu.seller");
-
+			//innerInnerSellerQuery.whereEqualTo("objectId", sellerId);
+			ParseObject sell;
 			try {
+				sell = innerInnerSellerQuery.get(sellerId);
+				
+				ParseQuery innerMenuQuery = new ParseQuery("Menu");
+				//innerMenuQuery.whereMatchesQuery("seller", innerInnerSellerQuery);
+				innerMenuQuery.whereEqualTo("seller", sell);
+				innerMenuQuery.orderByAscending("order");
+				//innerMenuQuery.whereMatchesKeyInQuery("seller", "objectId",innerInnerSellerQuery);
+				
+				ParseQuery query = new ParseQuery("MenuItems");
+				//query.whereMatchesQuery("menu", innerMenuQuery);
+				query.whereMatchesKeyInQuery("menu","objectId",innerMenuQuery);
+				//query.include("menu.seller");
+				query.include("menu");
+				//query.orderByAscending("menu");
+				
 				menuItems = query.find();
-			} catch (ParseException e) {
-				Log.d(TAG, "Parse: " + e.getMessage());
+				
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			return null;
-		}
+			
 
-		@Override
-		protected void onPreExecute() {
-			SellerMenuActivity.this.progressDialog = ProgressDialog.show(SellerMenuActivity.this, "",
-					"Loading...", true);
-			super.onPreExecute();
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			List<Map<String,String>> groupDataX = new ArrayList<Map<String,String>>();
-			List<List<Map<String,String>>> childDataX = new ArrayList<List<Map<String,String>>>();
+			groupDataX = new ArrayList<Map<String,String>>();
+			childDataX = new ArrayList<List<Map<String,String>>>();
 			Map<String, List<Map<String,String>>> temp = new LinkedHashMap<String, List<Map<String,String>>>();
 			Set<String> menuSet = new HashSet<String>(4); //Set of menu names.
-			Log.d(TAG, "Parse: seller name: " + menuItems.get(0).getParseObject("menu").getParseObject("seller").getString("publicName"));
+			//Log.d(TAG, "Parse: seller name: " + menuItems.get(0).getParseObject("menu").getParseObject("seller").getString("publicName"));
 			//Get all unique menu names.
 			for (ParseObject menuItem : menuItems) {
 				ParseObject menu = menuItem.getParseObject("menu");
@@ -132,6 +133,19 @@ public class SellerMenuActivity extends ExpandableListActivity {
 			for (Map.Entry<String, List<Map<String,String>>> entry : temp.entrySet()) {
 				childDataX.add(entry.getValue());
 			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			SellerMenuActivity.this.progressDialog = ProgressDialog.show(SellerMenuActivity.this, "",
+					"Loading...", true);
+			super.onPreExecute();
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
 			mAdapter = new SimpleExpandableListAdapter(
 					SellerMenuActivity.this,			//context
 					groupDataX,										//list of maps
@@ -146,13 +160,24 @@ public class SellerMenuActivity extends ExpandableListActivity {
 					new int[] { R.id.itemName,R.id.itemDescr,R.id.itemPrice }
 					);
 
-
+			
 			setListAdapter(mAdapter);
 			SellerMenuActivity.this.progressDialog.dismiss();
 		}
 	}
+	
 
-
+	@Override
+	public void onResume() {
+//		elv = getExpandableListView();
+//		int gc = mAdapter.getGroupCount();
+//		for(int i = 0; i < gc; i++) {
+//			elv.expandGroup(i);
+//		}
+		
+		
+		super.onResume();
+	}
 
 	@SuppressWarnings("deprecation")
 	@Override

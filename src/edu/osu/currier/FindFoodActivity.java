@@ -230,7 +230,7 @@ public class FindFoodActivity extends FragmentActivity implements
 						for(ParseObject seller: objects){
 							Seller s = new Seller(seller.getString("publicName"));
 							s.setAddress(seller.getString("Address"));
-							s.setId(seller.getString("objectId"));
+							s.setId(seller.getObjectId());
 							List<Address> address = null;
 							try {
 								address = new Geocoder(FindFoodActivity.this, Locale.ENGLISH).getFromLocationName(seller.getString("Address"), 1);
